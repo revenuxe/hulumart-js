@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { ChevronDown, ChevronRight, ChevronUp, Flame, Layers, Loader2, Plus, Search, Sparkles, Star, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -15,38 +16,37 @@ type SubcategoryOption = { id: string; name: string; category_id: string };
 
 type Selection = { type: "all" } | { type: "category"; id: string } | { type: "subcategory"; id: string };
 
+const PRODUCTS_DIRECTORY_QUERY_KEY = ["admin", "products-directory"];
+
+async function fetchProductsDirectory() {
+  const supabase = createClient();
+  const [{ data: products, error: productsError }, { data: categoryRows, error: categoriesError }, { data: subcategoryRows, error: subcategoriesError }] = await Promise.all([
+    supabase.from("products").select("*, categories(name,slug)").order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
+    supabase.from("categories").select("id,name").order("name"),
+    supabase.from("subcategories").select("id,name,category_id").order("name"),
+  ]);
+  if (productsError || categoriesError || subcategoriesError) throw productsError ?? categoriesError ?? subcategoriesError;
+  return {
+    products: (products as unknown as ProductRow[]) ?? [],
+    categories: categoryRows ?? [],
+    subcategories: subcategoryRows ?? [],
+  };
+}
+
 export default function ProductsPage() {
-  const [rows, setRows] = useState<ProductRow[]>([]);
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
-  const [subcategories, setSubcategories] = useState<SubcategoryOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: directory, isLoading: loading } = useQuery({
+    queryKey: PRODUCTS_DIRECTORY_QUERY_KEY,
+    queryFn: fetchProductsDirectory,
+  });
+  const rows = directory?.products ?? [];
+  const categories = directory?.categories ?? [];
+  const subcategories = directory?.subcategories ?? [];
   const [query, setQuery] = useState("");
   const [treeQuery, setTreeQuery] = useState("");
   const [selection, setSelection] = useState<Selection>({ type: "all" });
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [treeVisible, setTreeVisible] = useState(true);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const supabase = createClient();
-    const [{ data: products }, { data: categoryRows }, { data: subcategoryRows }] = await Promise.all([
-      supabase
-        .from("products")
-        .select("*, categories(name,slug)")
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: false }),
-      supabase.from("categories").select("id,name").order("name"),
-      supabase.from("subcategories").select("id,name,category_id").order("name"),
-    ]);
-    setRows((products as unknown as ProductRow[]) ?? []);
-    setCategories(categoryRows ?? []);
-    setSubcategories(subcategoryRows ?? []);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
 
   const countByCategory = useMemo(() => {
     const map = new Map<string, number>();
@@ -101,7 +101,7 @@ export default function ProductsPage() {
     const supabase = createClient();
     await Promise.all(row.images.map((url) => deleteCatalogImage(url)));
     await supabase.from("products").delete().eq("id", row.id);
-    load();
+    await queryClient.invalidateQueries({ queryKey: PRODUCTS_DIRECTORY_QUERY_KEY });
   }
 
   return (

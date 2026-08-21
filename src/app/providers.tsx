@@ -9,7 +9,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // tabs and back) re-fetched immediately even though nothing changed —
   // 30s means a quick tab switch reuses the cache instead of round-tripping
   // to Supabase again for data that's still fresh.
-  const [queryClient] = useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } }));
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60_000,
+        gcTime: 30 * 60_000,
+        refetchOnWindowFocus: false,
+        retry: 1,
+      },
+    },
+  }));
   return (
     <QueryClientProvider client={queryClient}>
       {children}
