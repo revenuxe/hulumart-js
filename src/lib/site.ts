@@ -1,9 +1,9 @@
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.decoreventz.com").replace(
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.zapiboo.com").replace(
   /\/$/,
   "",
 );
 
-export const SITE_NAME = "Decor Eventz";
+export const SITE_NAME = "Zapiboo";
 
 export const CONTACT = {
   phone: "+91 98862 85028",

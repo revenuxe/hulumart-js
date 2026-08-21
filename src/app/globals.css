@@ -53,41 +53,42 @@
   --radius: 1rem;
 
   /* Brand core */
-  --brand-purple: #65065e;
-  --brand-pink: #b70d65;
-  --brand-ink: #4d044a;
+  /* Zapiboo palette: violet leads actions; teal is a restrained supporting accent. */
+  --brand-purple: #6f36c9;
+  --brand-pink: #5b2fa4;
+  --brand-ink: #452174;
 
   /* Surfaces */
-  --background: #ffffff;
-  --foreground: #4d044a;
+  --background: #fbfaff;
+  --foreground: #452174;
   --surface: #ffffff;
   --surface-elevated: oklch(1 0 0);
 
   --card: oklch(1 0 0);
-  --card-foreground: #4d044a;
+  --card-foreground: #452174;
   --popover: oklch(1 0 0);
-  --popover-foreground: #4d044a;
+  --popover-foreground: #452174;
 
-  --primary: #65065e;
+  --primary: #452174;
   --primary-foreground: oklch(0.99 0.008 75);
   --secondary: #ffffff;
-  --secondary-foreground: #4d044a;
-  --muted: #ffffff;
+  --secondary-foreground: #452174;
+  --muted: #f5f2fa;
   --muted-foreground: #64748b;
-  --accent: #b70d65;
+  --accent: #0b8c94;
   --accent-foreground: oklch(0.99 0.008 75);
   --destructive: oklch(0.6 0.24 27);
   --destructive-foreground: oklch(0.99 0.005 320);
-  --border: #eadce6;
-  --input: #eadce6;
-  --ring: #b70d65;
+  --border: #e5def0;
+  --input: #e5def0;
+  --ring: #5b2fa4;
 
   /* Signature gradients */
-  --gradient-brand: linear-gradient(135deg, #65065e 0%, #b70d65 100%);
+  --gradient-brand: linear-gradient(135deg, #452174 0%, #6f36c9 100%);
   --gradient-brand-soft: linear-gradient(
     135deg,
-    rgb(101 6 94 / 0.10) 0%,
-    rgb(183 13 101 / 0.10) 100%
+    rgb(69 33 116 / 0.10) 0%,
+    rgb(111 54 201 / 0.10) 100%
   );
   --gradient-aurora: radial-gradient(
       1200px 600px at 10% -10%,
@@ -106,9 +107,9 @@
   /* Shadows */
   --shadow-glass:
     0 1px 0 0 oklch(1 0 0 / 0.6) inset, 0 8px 24px -8px oklch(0.22 0.07 245 / 0.12);
-  --shadow-elevated: 0 20px 44px -20px rgb(101 6 94 / 0.25);
-  --shadow-glow: 0 12px 28px -12px rgb(183 13 101 / 0.30);
-  --shadow-card: 0 2px 8px -2px rgb(101 6 94 / 0.08), 0 18px 34px -16px rgb(101 6 94 / 0.18);
+  --shadow-elevated: 0 20px 44px -20px rgb(69 33 116 / 0.25);
+  --shadow-glow: 0 12px 28px -12px rgb(91 47 164 / 0.28);
+  --shadow-card: 0 2px 8px -2px rgb(69 33 116 / 0.08), 0 18px 34px -16px rgb(69 33 116 / 0.18);
 
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);

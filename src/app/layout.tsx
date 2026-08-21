@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     "corporate event decoration India",
   ],
   authors: [{ name: SITE_NAME }],
-  icons: { icon: "/decor-eventz-logo.ico", shortcut: "/decor-eventz-logo.ico" },
+  icons: { icon: "/zapiboo-logo-cropped.webp", shortcut: "/zapiboo-logo-cropped.webp" },
   alternates: { canonical: "/" },
   openGraph: {
     title: SITE_TITLE,
@@ -67,7 +67,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#65065e",
+  themeColor: "#4a217d",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

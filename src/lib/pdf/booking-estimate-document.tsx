@@ -27,9 +27,9 @@ export type BookingEstimateData = {
   items: BookingEstimateItem[];
 };
 
-const PURPLE = "#45008c";
-const PINK = "#ff307e";
-const INK = "#211538";
+const PURPLE = "#6f36c9";
+const PINK = "#f83272";
+const INK = "#4a217d";
 const MUTED = "#746c85";
 const BORDER = "#e6e0f0";
 const SOFT = "#faf8fd";
@@ -188,7 +188,7 @@ export function BookingEstimateDocument({
 
   return (
     <Document
-      title={`Decor Eventz estimate — #${data.orderCode}`}
+      title={`Zapiboo estimate — #${data.orderCode}`}
       author={SITE_NAME}
       subject="Booking estimate"
     >

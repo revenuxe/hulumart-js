@@ -19,8 +19,8 @@ export async function renderVendorBillingPdf(
   vendor: VendorRow,
   mode: "quote" | "invoice",
 ): Promise<Buffer> {
-  const logoBuffer = await readFile(join(process.cwd(), "src/assets/decor-eventz-logo-transparent.png"));
-  const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+  const logoBuffer = await readFile(join(process.cwd(), "src/assets/zapiboo-logo.webp"));
+  const logoSrc = `data:image/webp;base64,${logoBuffer.toString("base64")}`;
 
   const items = parseQuoteItems(booking.vendor_quote_items);
   const total = mode === "invoice" ? Number(booking.vendor_bill_amount ?? booking.vendor_quote_amount ?? 0) : Number(booking.vendor_quote_amount ?? 0);

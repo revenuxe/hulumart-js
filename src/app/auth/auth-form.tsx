@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import logo from "@/assets/decor-eventz-logo.webp";
+import logo from "@/assets/zapiboo-logo-cropped.webp";
 
 export function AuthForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
@@ -75,8 +75,10 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
         <Link href="/" className="flex items-center">
           <Image
             src={logo}
-            alt="Decor Eventz — Dream, Design, Deliver"
-            className="h-9 w-32 object-contain"
+            alt="Zapiboo — Play, Laugh, Discover"
+            width={74}
+            height={44}
+            className="h-11 w-[74px] object-contain"
           />
         </Link>
         <span className="w-10" />
@@ -89,7 +91,7 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
         <p className="mt-2 text-sm text-muted-foreground">
           {mode === "signin"
             ? "Sign in to track orders, save measurements, and manage bookings."
-            : "Join Decor Eventz to save your details and manage bookings."}
+            : "Join Zapiboo to save your details and manage bookings."}
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-3">

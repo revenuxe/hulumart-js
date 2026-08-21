@@ -34,8 +34,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   ]);
   if (!booking) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const logoBuffer = await readFile(join(process.cwd(), "src/assets/decor-eventz-logo-transparent.png"));
-  const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+  const logoBuffer = await readFile(join(process.cwd(), "src/assets/zapiboo-logo.webp"));
+  const logoSrc = `data:image/webp;base64,${logoBuffer.toString("base64")}`;
 
   const estimateItems: BookingEstimateItem[] = (items ?? []).map((it) => ({
     serviceName: it.service_name,

@@ -59,7 +59,8 @@ export function SubcategoryCard({
     return (
       <button
         onClick={onClick}
-        className="group flex w-20 shrink-0 flex-col items-center gap-2 text-center md:w-24"
+        aria-pressed={active}
+        className="group flex w-20 shrink-0 flex-col items-center gap-2 rounded-xl text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-24"
       >
         <Thumb subcategory={subcategory} active={active} />
         {label}

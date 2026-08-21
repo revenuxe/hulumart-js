@@ -30,7 +30,7 @@ export default async function Home() {
   const weddingServices = weddingCategory ? await getServicesByCategory("wedding") : [];
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-background pb-24 md:pb-0">
       <TopBar />
       <main>
         <Hero />

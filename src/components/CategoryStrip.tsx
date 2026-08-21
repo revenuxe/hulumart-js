@@ -8,11 +8,11 @@ export function CategoryStrip({ categories }: { categories: DecorCategory[] }) {
     <section className="mx-auto w-full max-w-md px-6 pb-14 md:max-w-7xl md:px-8 md:pb-20">
       <div className="relative mb-7 md:mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-primary md:text-[30px]">Categories</h2>
-          <div className="mt-2 h-1 w-11 rounded-full bg-brand-pink" />
+          <p className="text-xs font-bold uppercase tracking-widest text-accent">Choose an occasion</p>
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-primary md:text-[30px]">Find your celebration</h2>
         </div>
-        <Link href="/categories" className="absolute bottom-0 right-0 inline-flex items-center gap-1 text-sm font-semibold text-brand-pink">
-          View all <ArrowUpRight className="h-4 w-4" />
+        <Link href="/categories" className="absolute bottom-0 right-0 inline-flex min-h-10 items-center gap-1 rounded-full bg-primary/5 px-3 text-sm font-semibold text-primary transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          All categories <ArrowUpRight className="h-4 w-4" />
         </Link>
       </div>
 

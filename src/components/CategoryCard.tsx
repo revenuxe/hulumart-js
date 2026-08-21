@@ -6,15 +6,20 @@ export function CategoryCard({ href, image, name, tagline }: { href: string; ima
   return (
     <Link
       href={href}
-      className="group relative block aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-[#f8eee7] p-1.5 shadow-[0_16px_34px_-24px_rgba(61,7,91,.38)] transition duration-300 active:scale-[0.98] md:rounded-[1.75rem] md:hover:-translate-y-1 md:hover:shadow-elevated"
+      className="group flex aspect-[4/5] flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-card transition duration-300 active:scale-[0.98] md:hover:-translate-y-1 md:hover:shadow-elevated"
     >
-      <div className="relative h-full w-full overflow-hidden rounded-[1.2rem] bg-muted md:rounded-[1.45rem]">
+      <div className="relative min-h-0 flex-1 overflow-hidden bg-muted">
         {image ? <Image src={image} alt={tagline ? `${name} — ${tagline}` : name} fill loading="lazy" sizes="(min-width: 768px) 16vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-110" /> : <div className="h-full w-full bg-gradient-brand" />}
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/10 to-transparent" />
-        <div className="absolute inset-x-2.5 bottom-2.5 flex h-16 items-center rounded-2xl border border-white/35 bg-white/90 px-3 text-primary shadow-lg backdrop-blur-md">
-          <span className="pr-5 text-[13px] font-bold leading-[1.2] md:text-sm">{name}</span>
-          <ArrowUpRight className="absolute right-3 h-4 w-4 text-accent transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/30 to-transparent" />
+      </div>
+      <div className="flex min-h-[68px] items-center gap-1.5 px-3 py-2.5 md:min-h-[82px] md:gap-2 md:px-4 md:py-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-[12px] font-bold text-primary md:text-[15px]">{name}</h3>
+          <p className="mt-0.5 truncate text-[10px] text-muted-foreground md:text-xs">{tagline || "Explore themed setups"}</p>
         </div>
+        <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/8 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground md:h-9 md:w-9">
+          <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 md:h-4 md:w-4" />
+        </span>
       </div>
     </Link>
   );
