@@ -15,6 +15,7 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
+  const [selectionStatus, setSelectionStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pastedUrl, setPastedUrl] = useState("");
   const [isDragging, setIsDragging] = useState(false);
@@ -28,6 +29,8 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
     const availableSlots = MAX_IMAGES - value.length;
     const selected = Array.from(files).slice(0, Math.max(availableSlots, 0));
     if (!selected.length) return setError(`A product can have up to ${MAX_IMAGES} photos.`);
+
+    setSelectionStatus(`${selected.length} photo${selected.length === 1 ? "" : "s"} selected`);
 
     const tooLarge = selected.filter((file) => file.size > MAX_IMAGE_BYTES);
     const eligible = selected.filter((file) => file.size > 0 && file.size <= MAX_IMAGE_BYTES);
@@ -49,6 +52,9 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
         }
       }
       if (uploaded.length) onChange([...value, ...uploaded]);
+      if (uploaded.length) {
+        setSelectionStatus(`${uploaded.length} photo${uploaded.length === 1 ? "" : "s"} added to the gallery`);
+      }
       if (messages.length) setError(messages.join(". "));
     } finally {
       setUploadStatus("");
@@ -137,9 +143,14 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
             multiple
             disabled={uploading}
             className="block w-full cursor-pointer text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-bold file:text-primary-foreground hover:file:brightness-110 disabled:cursor-not-allowed"
+            onClick={(event) => {
+              // Clear only immediately before a new selection. This allows the
+              // native control to visibly show the chosen files and still lets
+              // an admin select the same file again after a failed upload.
+              event.currentTarget.value = "";
+            }}
             onChange={(event) => {
               const files = event.target.files;
-              event.target.value = "";
               if (files?.length) void handleFiles(files);
             }}
           />
@@ -147,6 +158,7 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
       )}
 
       {uploadStatus && <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary"><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadStatus}</p>}
+      {selectionStatus && !uploadStatus && <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><Check className="h-3.5 w-3.5" /> {selectionStatus}</p>}
       {value.length > 0 && !uploading && <p className="inline-flex items-center gap-1.5 text-xs text-emerald-700"><Check className="h-3.5 w-3.5" /> Gallery ready — the first image will be used across product listings.</p>}
 
       <div className="flex gap-2">
