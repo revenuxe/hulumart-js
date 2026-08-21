@@ -2,7 +2,14 @@ import { unstable_cache } from "next/cache";
 import { publicSupabaseClient } from "@/lib/supabase/public";
 import { testimonials } from "./testimonials";
 import { cities } from "./cities";
-import type { BalloonOption, DecorCategory, DecorService, DecorSubcategory, ProductFaq, ServiceAddOn } from "./types";
+import type {
+  BalloonOption,
+  DecorCategory,
+  DecorService,
+  DecorSubcategory,
+  ProductFaq,
+  ServiceAddOn,
+} from "./types";
 
 type Catalog = {
   categories: DecorCategory[];
@@ -18,23 +25,74 @@ type Catalog = {
 const getCatalog = unstable_cache(
   async (): Promise<Catalog> => {
     const supabase = publicSupabaseClient();
-    const [{ data: categoryRows, error: categoriesError }, { data: subcategoryRows, error: subcategoriesError }, { data: productRows, error: productsError }, { data: paletteRows, error: palettesError }] = await Promise.all([
+    const [
+      { data: categoryRows, error: categoriesError },
+      { data: subcategoryRows, error: subcategoriesError },
+      { data: productRows, error: productsError },
+      { data: paletteRows, error: palettesError },
+      { data: contentRows, error: contentError },
+    ] = await Promise.all([
       supabase.from("categories").select("*").order("sort_order"),
-      supabase.from("subcategories").select("*, categories(slug)").order("sort_order"),
+      supabase
+        .from("subcategories")
+        .select("*, categories(slug)")
+        .order("sort_order"),
       supabase
         .from("products")
-        .select("*, categories(slug), subcategories(slug), product_addon_links(addons(*))")
+        .select(
+          "*, categories(slug), subcategories(slug), product_addon_links(addons(*))",
+        )
         .order("sort_order"),
-      supabase.from("decoration_content_items").select("id,name,content").eq("kind", "balloon_palette").eq("is_active", true),
+      supabase
+        .from("decoration_content_items")
+        .select("id,name,content")
+        .eq("kind", "balloon_palette")
+        .eq("is_active", true),
+      supabase
+        .from("decoration_content_items")
+        .select("id,kind,content")
+        .neq("kind", "balloon_palette")
+        .eq("is_active", true),
     ]);
     // Do not silently turn a failed catalog query into an empty catalog: that
     // would make every public product route look like a 404.
-    if (categoriesError || subcategoriesError || productsError || palettesError) {
-      throw categoriesError ?? subcategoriesError ?? productsError ?? palettesError;
+    if (
+      categoriesError ||
+      subcategoriesError ||
+      productsError ||
+      palettesError ||
+      contentError
+    ) {
+      throw (
+        categoriesError ??
+        subcategoriesError ??
+        productsError ??
+        palettesError ??
+        contentError
+      );
     }
     const paletteById = new Map(
-      ((paletteRows ?? []) as unknown as { id: string; name: string; content: { pairs?: { color1?: { name?: string; hex?: string }; color2?: { name?: string; hex?: string } }[] } }[])
-        .map((palette) => [palette.id, palette]),
+      (
+        (paletteRows ?? []) as unknown as {
+          id: string;
+          name: string;
+          content: {
+            pairs?: {
+              color1?: { name?: string; hex?: string };
+              color2?: { name?: string; hex?: string };
+            }[];
+          };
+        }[]
+      ).map((palette) => [palette.id, palette]),
+    );
+    const contentById = new Map(
+      (
+        (contentRows ?? []) as unknown as {
+          id: string;
+          kind: string;
+          content: Record<string, unknown>;
+        }[]
+      ).map((item) => [item.id, item]),
     );
 
     const categories: DecorCategory[] = (categoryRows ?? []).map((c) => ({
@@ -48,25 +106,40 @@ const getCatalog = unstable_cache(
       updatedAt: c.updated_at,
     }));
 
-    const subcategories: DecorSubcategory[] = (subcategoryRows ?? []).map((s) => ({
-      id: s.id,
-      slug: s.slug,
-      categorySlug: s.categories?.slug ?? "",
-      name: s.name,
-      tagline: s.tagline ?? "",
-      image: s.image_url ?? "",
-      sortOrder: s.sort_order,
-      updatedAt: s.updated_at,
-    }));
+    const subcategories: DecorSubcategory[] = (subcategoryRows ?? []).map(
+      (s) => ({
+        id: s.id,
+        slug: s.slug,
+        categorySlug: s.categories?.slug ?? "",
+        name: s.name,
+        tagline: s.tagline ?? "",
+        image: s.image_url ?? "",
+        sortOrder: s.sort_order,
+        updatedAt: s.updated_at,
+      }),
+    );
 
     const services: DecorService[] = (productRows ?? []).map((p) => {
       // One batched lookup for every palette avoids an N+1 public-product
       // query and does not rely on PostgREST's relationship schema cache.
-      const palette = p.balloon_palette_id ? paletteById.get(p.balloon_palette_id) : undefined;
-      const paletteOptions: BalloonOption[] = (palette?.content.pairs ?? []).flatMap((pair) => {
-        const colors = [pair.color1?.hex, pair.color2?.hex].filter((color): color is string => !!color);
+      const palette = p.balloon_palette_id
+        ? paletteById.get(p.balloon_palette_id)
+        : undefined;
+      const paletteOptions: BalloonOption[] = (
+        palette?.content.pairs ?? []
+      ).flatMap((pair) => {
+        const colors = [pair.color1?.hex, pair.color2?.hex].filter(
+          (color): color is string => !!color,
+        );
         const names = [pair.color1?.name, pair.color2?.name].filter(Boolean);
-        return colors.length === 2 ? [{ name: names.join(" + ") || palette?.name || "Balloon pair", colors }] : [];
+        return colors.length === 2
+          ? [
+              {
+                name: names.join(" + ") || palette?.name || "Balloon pair",
+                colors,
+              },
+            ]
+          : [];
       });
       const priceOriginal = p.price;
       const priceDiscounted = p.sale_price ?? p.price;
@@ -79,6 +152,55 @@ const getCatalog = unstable_cache(
         .filter((a): a is NonNullable<typeof a> => a !== null && a.is_active)
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((a) => ({ id: a.id, name: a.name, price: a.price }));
+
+      const includedGroup = p.included_group_id
+        ? contentById.get(p.included_group_id)
+        : undefined;
+      const faqGroup = p.faq_group_id
+        ? contentById.get(p.faq_group_id)
+        : undefined;
+      const deliveryGroup = p.delivery_group_id
+        ? contentById.get(p.delivery_group_id)
+        : undefined;
+      const careGroup = p.care_group_id
+        ? contentById.get(p.care_group_id)
+        : undefined;
+      const groupIncluded =
+        includedGroup?.kind === "included_set" &&
+        Array.isArray(includedGroup.content.included)
+          ? includedGroup.content.included.filter(
+              (item): item is string => typeof item === "string",
+            )
+          : undefined;
+      const groupNotIncluded =
+        includedGroup?.kind === "included_set" &&
+        Array.isArray(includedGroup.content.not_included)
+          ? includedGroup.content.not_included.filter(
+              (item): item is string => typeof item === "string",
+            )
+          : undefined;
+      const groupFaqs =
+        faqGroup?.kind === "faq_set" && Array.isArray(faqGroup.content.faqs)
+          ? faqGroup.content.faqs.filter(
+              (faq): faq is ProductFaq =>
+                !!faq &&
+                typeof faq === "object" &&
+                "question" in faq &&
+                "answer" in faq &&
+                typeof faq.question === "string" &&
+                typeof faq.answer === "string",
+            )
+          : undefined;
+      const groupDelivery =
+        deliveryGroup?.kind === "delivery_note" &&
+        typeof deliveryGroup.content.text === "string"
+          ? deliveryGroup.content.text
+          : undefined;
+      const groupCare =
+        careGroup?.kind === "care_note" &&
+        typeof careGroup.content.text === "string"
+          ? careGroup.content.text
+          : undefined;
 
       return {
         id: p.id,
@@ -94,15 +216,19 @@ const getCatalog = unstable_cache(
         discountPct,
         rating: p.rating,
         reviewCount: p.review_count,
-        included: p.included,
-        notIncluded: p.not_included,
+        included: groupIncluded ?? p.included,
+        notIncluded: groupNotIncluded ?? p.not_included,
         // Storefront balloon choices come only from a selected reusable
         // palette. Products without one must not render an empty/legacy
         // balloon section.
         balloonOptions: p.balloon_palette_id ? paletteOptions : [],
-        faqs: (p.faqs as unknown as ProductFaq[]).filter((faq) => faq?.question && faq?.answer),
-        deliveryInfo: p.delivery_info ?? undefined,
-        careInfo: p.care_info ?? undefined,
+        faqs:
+          groupFaqs ??
+          (p.faqs as unknown as ProductFaq[]).filter(
+            (faq) => faq?.question && faq?.answer,
+          ),
+        deliveryInfo: groupDelivery ?? p.delivery_info ?? undefined,
+        careInfo: groupCare ?? p.care_info ?? undefined,
         tags: p.tags,
         addOns,
         sortOrder: p.sort_order,
@@ -126,12 +252,16 @@ export async function getCategories(): Promise<DecorCategory[]> {
   return categories;
 }
 
-export async function getCategoryBySlug(slug: string): Promise<DecorCategory | undefined> {
+export async function getCategoryBySlug(
+  slug: string,
+): Promise<DecorCategory | undefined> {
   const { categories } = await getCatalog();
   return categories.find((c) => c.slug === slug);
 }
 
-export async function getSubcategoriesByCategory(categorySlug: string): Promise<DecorSubcategory[]> {
+export async function getSubcategoriesByCategory(
+  categorySlug: string,
+): Promise<DecorSubcategory[]> {
   const { subcategories } = await getCatalog();
   return subcategories.filter((s) => s.categorySlug === categorySlug);
 }
@@ -153,10 +283,14 @@ export async function getSubcategoryBySlug(
   subcategorySlug: string,
 ): Promise<DecorSubcategory | undefined> {
   const { subcategories } = await getCatalog();
-  return subcategories.find((s) => s.categorySlug === categorySlug && s.slug === subcategorySlug);
+  return subcategories.find(
+    (s) => s.categorySlug === categorySlug && s.slug === subcategorySlug,
+  );
 }
 
-export async function getServicesByCategory(categorySlug: string): Promise<DecorService[]> {
+export async function getServicesByCategory(
+  categorySlug: string,
+): Promise<DecorService[]> {
   const { services } = await getCatalog();
   return services.filter((s) => s.categorySlug === categorySlug);
 }
@@ -166,7 +300,9 @@ export async function getServiceBySlug(
   serviceSlug: string,
 ): Promise<DecorService | undefined> {
   const { services } = await getCatalog();
-  return services.find((s) => s.categorySlug === categorySlug && s.slug === serviceSlug);
+  return services.find(
+    (s) => s.categorySlug === categorySlug && s.slug === serviceSlug,
+  );
 }
 
 export async function getTrendingServices(limit = 8): Promise<DecorService[]> {
@@ -179,7 +315,10 @@ export async function getFeaturedServices(limit = 8): Promise<DecorService[]> {
   return services.filter((s) => s.isFeatured).slice(0, limit);
 }
 
-export async function getRelatedServices(service: DecorService, limit = 4): Promise<DecorService[]> {
+export async function getRelatedServices(
+  service: DecorService,
+  limit = 4,
+): Promise<DecorService[]> {
   const { services } = await getCatalog();
   const sameCategory = services.filter(
     (s) => s.categorySlug === service.categorySlug && s.slug !== service.slug,
