@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { createClient } from "@/lib/supabase/server";
-import { s3Client, AWS_S3_BUCKET_NAME } from "@/lib/s3";
+import { getS3Client, getS3Config } from "@/lib/s3";
 import { s3PublicUrl, s3KeyFromUrl } from "@/lib/s3-url";
 import { looksLikeImage, sanitizeFileName } from "@/lib/image-sniff";
 
@@ -41,9 +41,10 @@ export async function POST(request: NextRequest) {
     }
 
     const key = `${pathPrefix}/${Date.now()}-${sanitizeFileName(file.name)}`;
-    await s3Client.send(
+    const { bucketName } = getS3Config();
+    await getS3Client().send(
       new PutObjectCommand({
-        Bucket: AWS_S3_BUCKET_NAME,
+        Bucket: bucketName,
         Key: key,
         Body: buffer,
         ContentType: file.type || "application/octet-stream",
@@ -68,7 +69,8 @@ export async function DELETE(request: NextRequest) {
     // — deletes are always best-effort cleanup, never something to fail on.
     if (!key) return NextResponse.json({ ok: true });
 
-    await s3Client.send(new DeleteObjectCommand({ Bucket: AWS_S3_BUCKET_NAME, Key: key }));
+    const { bucketName } = getS3Config();
+    await getS3Client().send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[api/upload DELETE]", err);

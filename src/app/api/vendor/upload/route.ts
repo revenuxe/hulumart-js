@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { createClient } from "@/lib/supabase/server";
-import { s3Client, AWS_S3_BUCKET_NAME } from "@/lib/s3";
+import { getS3Client, getS3Config } from "@/lib/s3";
 import { s3PublicUrl } from "@/lib/s3-url";
 import { looksLikeImage, sanitizeFileName } from "@/lib/image-sniff";
 
@@ -66,9 +66,10 @@ export async function POST(request: NextRequest) {
     }
 
     const key = `bookings/${bookingId}/${kind}/${Date.now()}-${sanitizeFileName(file.name)}`;
-    await s3Client.send(
+    const { bucketName } = getS3Config();
+    await getS3Client().send(
       new PutObjectCommand({
-        Bucket: AWS_S3_BUCKET_NAME,
+        Bucket: bucketName,
         Key: key,
         Body: buffer,
         ContentType: file.type || "application/octet-stream",
