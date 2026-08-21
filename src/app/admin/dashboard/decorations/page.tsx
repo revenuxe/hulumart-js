@@ -25,6 +25,12 @@ type ContentItem = {
   content: Json;
 };
 type Faq = { question: string; answer: string };
+type PalettePair = {
+  id: string;
+  color1: { name: string; hex: string };
+  color2: { name: string; hex: string };
+};
+type PaletteItem = { id: string; name: string; content: Json };
 
 const TABS: {
   key: Tab;
@@ -90,15 +96,32 @@ async function fetchContent(): Promise<ContentItem[]> {
   return (data ?? []) as ContentItem[];
 }
 
+async function fetchPalettes(): Promise<PaletteItem[]> {
+  const { data, error } = await createClient()
+    .from("decoration_content_items")
+    .select("id,name,content")
+    .eq("kind", "balloon_palette")
+    .order("name");
+  if (error) throw error;
+  return (data ?? []) as PaletteItem[];
+}
+
 export default function DecorationsPage() {
   const [active, setActive] = useState<Tab>("palettes");
   const [editing, setEditing] = useState<ContentItem | null | undefined>(
     undefined,
   );
+  const [editingPalette, setEditingPalette] = useState<
+    PaletteItem | null | undefined
+  >(undefined);
   const queryClient = useQueryClient();
   const { data: content = [], isLoading } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: fetchContent,
+  });
+  const { data: palettes = [], isLoading: palettesLoading } = useQuery({
+    queryKey: ["admin", "balloon-palettes"],
+    queryFn: fetchPalettes,
   });
   const currentTab = TABS.find((tab) => tab.key === active)!;
   const items = currentTab.kind
@@ -131,9 +154,10 @@ export default function DecorationsPage() {
           </p>
         </div>
         <button
-          onClick={() => currentTab.kind && setEditing(null)}
-          disabled={!currentTab.kind}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+          onClick={() =>
+            active === "palettes" ? setEditingPalette(null) : setEditing(null)
+          }
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow"
         >
           <Plus className="h-3.5 w-3.5" /> Create
         </button>
@@ -156,10 +180,16 @@ export default function DecorationsPage() {
         </div>
         <div className="p-5">
           {active === "palettes" ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Balloon palettes are managed from the product palette editor.
-              Choose a content tab to create reusable product information.
-            </p>
+            <PaletteLibrary
+              palettes={palettes}
+              loading={palettesLoading}
+              onEdit={setEditingPalette}
+              onChanged={() =>
+                queryClient.invalidateQueries({
+                  queryKey: ["admin", "balloon-palettes"],
+                })
+              }
+            />
           ) : isLoading ? (
             <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
           ) : items.length === 0 ? (
@@ -191,6 +221,19 @@ export default function DecorationsPage() {
             setEditing(undefined);
             await fetch("/api/admin/revalidate-catalog", { method: "POST" });
             queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+          }}
+        />
+      )}
+      {editingPalette !== undefined && (
+        <PaletteEditor
+          item={editingPalette}
+          onClose={() => setEditingPalette(undefined)}
+          onSaved={async () => {
+            setEditingPalette(undefined);
+            await fetch("/api/admin/revalidate-catalog", { method: "POST" });
+            queryClient.invalidateQueries({
+              queryKey: ["admin", "balloon-palettes"],
+            });
           }}
         />
       )}
@@ -519,6 +562,300 @@ function LineEditor({
       >
         <Plus className="h-3.5 w-3.5" /> Add line
       </button>
+    </div>
+  );
+}
+
+function palettePairs(content: Json): PalettePair[] {
+  const pairs = asRecord(content).pairs;
+  if (!Array.isArray(pairs)) return [];
+  return pairs.flatMap((pair) => {
+    const row =
+      pair && typeof pair === "object" && !Array.isArray(pair) ? pair : null;
+    const first =
+      row?.color1 &&
+      typeof row.color1 === "object" &&
+      !Array.isArray(row.color1)
+        ? row.color1
+        : null;
+    const second =
+      row?.color2 &&
+      typeof row.color2 === "object" &&
+      !Array.isArray(row.color2)
+        ? row.color2
+        : null;
+    return first &&
+      second &&
+      typeof first.name === "string" &&
+      typeof first.hex === "string" &&
+      typeof second.name === "string" &&
+      typeof second.hex === "string"
+      ? [
+          {
+            id:
+              row && typeof row.id === "string" ? row.id : crypto.randomUUID(),
+            color1: { name: first.name, hex: first.hex },
+            color2: { name: second.name, hex: second.hex },
+          },
+        ]
+      : [];
+  });
+}
+
+const emptyPair = (): PalettePair => ({
+  id: crypto.randomUUID(),
+  color1: { name: "", hex: "#ffffff" },
+  color2: { name: "", hex: "#000000" },
+});
+
+function PaletteLibrary({
+  palettes,
+  loading,
+  onEdit,
+  onChanged,
+}: {
+  palettes: PaletteItem[];
+  loading: boolean;
+  onEdit: (item: PaletteItem) => void;
+  onChanged: () => void;
+}) {
+  async function remove(item: PaletteItem) {
+    if (
+      !confirm(
+        `Delete “${item.name}”? Products using it will have no balloon palette.`,
+      )
+    )
+      return;
+    const { error } = await createClient()
+      .from("decoration_content_items")
+      .delete()
+      .eq("id", item.id);
+    if (error) return alert(error.message);
+    await fetch("/api/admin/revalidate-catalog", { method: "POST" });
+    onChanged();
+  }
+  if (loading)
+    return (
+      <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
+    );
+  if (!palettes.length)
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        No balloon palettes yet. Use Create to add one.
+      </p>
+    );
+  return (
+    <div className="space-y-3">
+      {palettes.map((palette) => (
+        <div
+          key={palette.id}
+          className="flex items-start justify-between gap-3 rounded-2xl border border-border bg-background p-4"
+        >
+          <div>
+            <h3 className="font-semibold">{palette.name}</h3>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {palettePairs(palette.content).map((pair) => (
+                <span
+                  key={pair.id}
+                  className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs"
+                >
+                  <i
+                    className="h-3 w-3 rounded-full border"
+                    style={{ backgroundColor: pair.color1.hex }}
+                  />
+                  {pair.color1.name}
+                  <span>+</span>
+                  <i
+                    className="h-3 w-3 rounded-full border"
+                    style={{ backgroundColor: pair.color2.hex }}
+                  />
+                  {pair.color2.name}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onEdit(palette)}
+              className="rounded-full border px-3 py-1.5 text-xs font-semibold"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => void remove(palette)}
+              className="grid h-8 w-8 place-items-center rounded-full border text-destructive"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PaletteEditor({
+  item,
+  onClose,
+  onSaved,
+}: {
+  item: PaletteItem | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [name, setName] = useState(item?.name ?? "");
+  const [pairs, setPairs] = useState<PalettePair[]>(() =>
+    item ? palettePairs(item.content) : [emptyPair()],
+  );
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  async function save() {
+    const cleanName = name.trim();
+    if (!cleanName) return setError("A palette name is required.");
+    if (
+      !pairs.length ||
+      pairs.some(
+        (pair) =>
+          !pair.color1.name.trim() ||
+          !pair.color2.name.trim() ||
+          !/^#[0-9a-f]{6}$/i.test(pair.color1.hex) ||
+          !/^#[0-9a-f]{6}$/i.test(pair.color2.hex),
+      )
+    )
+      return setError("Every pair needs two names and valid HEX colours.");
+    setSaving(true);
+    const content: Json = { pairs };
+    const supabase = createClient();
+    const result = item
+      ? await supabase
+          .from("decoration_content_items")
+          .update({ name: cleanName, content })
+          .eq("id", item.id)
+      : await supabase
+          .from("decoration_content_items")
+          .insert({ kind: "balloon_palette", name: cleanName, content });
+    setSaving(false);
+    if (result.error) return setError(result.error.message);
+    onSaved();
+  }
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-4">
+      <div className="mx-auto my-8 max-w-2xl rounded-3xl bg-card shadow-elevated">
+        <div className="flex items-center justify-between border-b p-5">
+          <h2 className="font-display text-2xl">
+            {item ? "Edit" : "Create"} balloon palette
+          </h2>
+          <button onClick={onClose}>
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="space-y-4 p-5">
+          <label className="block text-sm font-semibold">
+            Palette name
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="mt-1.5 w-full rounded-xl border px-3 py-2"
+            />
+          </label>
+          {pairs.map((pair, index) => (
+            <div
+              key={pair.id}
+              className="grid gap-2 rounded-xl border p-3 sm:grid-cols-2"
+            >
+              {(["color1", "color2"] as const).map((key) => (
+                <div key={key} className="flex gap-2">
+                  <input
+                    type="color"
+                    value={pair[key].hex}
+                    onChange={(event) =>
+                      setPairs((rows) =>
+                        rows.map((row, i) =>
+                          i === index
+                            ? {
+                                ...row,
+                                [key]: { ...row[key], hex: event.target.value },
+                              }
+                            : row,
+                        ),
+                      )
+                    }
+                  />
+                  <div className="flex-1 space-y-1">
+                    <input
+                      value={pair[key].name}
+                      onChange={(event) =>
+                        setPairs((rows) =>
+                          rows.map((row, i) =>
+                            i === index
+                              ? {
+                                  ...row,
+                                  [key]: {
+                                    ...row[key],
+                                    name: event.target.value,
+                                  },
+                                }
+                              : row,
+                          ),
+                        )
+                      }
+                      placeholder="Colour name"
+                      className="w-full rounded-lg border px-2 py-1 text-sm"
+                    />
+                    <input
+                      value={pair[key].hex}
+                      onChange={(event) =>
+                        setPairs((rows) =>
+                          rows.map((row, i) =>
+                            i === index
+                              ? {
+                                  ...row,
+                                  [key]: {
+                                    ...row[key],
+                                    hex: event.target.value,
+                                  },
+                                }
+                              : row,
+                          ),
+                        )
+                      }
+                      className="w-full rounded-lg border px-2 py-1 text-xs"
+                    />
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={() =>
+                  setPairs((rows) => rows.filter((_, i) => i !== index))
+                }
+                disabled={pairs.length === 1}
+                className="text-xs font-semibold text-destructive"
+              >
+                Remove pair
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={() => setPairs((rows) => [...rows, emptyPair()])}
+            className="inline-flex items-center gap-1 rounded-full border px-3 py-2 text-sm font-semibold"
+          >
+            <Plus className="h-4 w-4" /> Add pair
+          </button>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+        <div className="flex justify-end gap-2 border-t p-5">
+          <button onClick={onClose} className="rounded-full border px-4 py-2">
+            Cancel
+          </button>
+          <button
+            onClick={() => void save()}
+            disabled={saving}
+            className="rounded-full bg-gradient-brand px-4 py-2 font-semibold text-primary-foreground"
+          >
+            {saving ? "Saving" : "Save palette"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
