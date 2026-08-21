@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useState } from "react";
 import { Check, GripVertical, ImagePlus, Loader2, Star, X } from "lucide-react";
 import { deleteCatalogImage, uploadCatalogImage } from "@/lib/s3-upload-client";
 
@@ -13,7 +13,7 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
   pathPrefix: string;
   onUploadingChange?: (uploading: boolean) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -121,13 +121,13 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
             </div>
           ))}
           {value.length < MAX_IMAGES && (
-            <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading} aria-label="Upload product images" className="flex h-28 w-28 shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-background text-primary transition hover:border-primary hover:bg-primary/5 disabled:opacity-60">
+            <label htmlFor={inputId} aria-disabled={uploading} className="flex h-28 w-28 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-background text-primary transition hover:border-primary hover:bg-primary/5 aria-disabled:pointer-events-none aria-disabled:opacity-60">
               {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
               <span className="text-xs font-bold">{uploading ? "Uploading" : "Add photos"}</span>
-            </button>
+            </label>
           )}
         </div>
-        <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/heic,image/heif" multiple className="hidden" onChange={(event) => { const files = event.target.files; event.target.value = ""; if (files?.length) void handleFiles(files); }} />
+        <input id={inputId} type="file" accept="image/*" multiple className="hidden" onChange={(event) => { const files = event.target.files; event.target.value = ""; if (files?.length) void handleFiles(files); }} />
       </div>
 
       {uploadStatus && <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary"><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadStatus}</p>}
