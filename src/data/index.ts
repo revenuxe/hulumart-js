@@ -23,7 +23,7 @@ const getCatalog = unstable_cache(
       supabase.from("subcategories").select("*, categories(slug)").order("sort_order"),
       supabase
         .from("products")
-        .select("*, categories(slug), subcategories(slug), product_addon_links(addons(*))")
+        .select("*, categories(slug), subcategories(slug), product_addon_links(addons(*)), decoration_content_items(id,name,content)")
         .order("sort_order"),
     ]);
 
@@ -50,6 +50,12 @@ const getCatalog = unstable_cache(
     }));
 
     const services: DecorService[] = (productRows ?? []).map((p) => {
+      const palette = (p as typeof p & { decoration_content_items: { name: string; content: { pairs?: { color1?: { name?: string; hex?: string }; color2?: { name?: string; hex?: string } }[] } } | null }).decoration_content_items;
+      const paletteOptions: BalloonOption[] = (palette?.content.pairs ?? []).flatMap((pair) => {
+        const colors = [pair.color1?.hex, pair.color2?.hex].filter((color): color is string => !!color);
+        const names = [pair.color1?.name, pair.color2?.name].filter(Boolean);
+        return colors.length === 2 ? [{ name: names.join(" + ") || palette?.name || "Balloon pair", colors }] : [];
+      });
       const priceOriginal = p.price;
       const priceDiscounted = p.sale_price ?? p.price;
       const discountPct =
@@ -78,7 +84,7 @@ const getCatalog = unstable_cache(
         reviewCount: p.review_count,
         included: p.included,
         notIncluded: p.not_included,
-        balloonOptions: (p.balloon_options as unknown as BalloonOption[]).filter(
+        balloonOptions: paletteOptions.length ? paletteOptions : (p.balloon_options as unknown as BalloonOption[]).filter(
           (option) => option?.name && Array.isArray(option.colors),
         ),
         faqs: (p.faqs as unknown as ProductFaq[]).filter((faq) => faq?.question && faq?.answer),

@@ -340,6 +340,36 @@ export type Database = {
         }
         Relationships: []
       }
+      decoration_content_items: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: "balloon_palette" | "included_set" | "faq_set" | "delivery_note" | "care_note"
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: "balloon_palette" | "included_set" | "faq_set" | "delivery_note" | "care_note"
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: "balloon_palette" | "included_set" | "faq_set" | "delivery_note" | "care_note"
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_addon_links: {
         Row: {
           addon_id: string
@@ -379,6 +409,7 @@ export type Database = {
       products: {
         Row: {
           category_id: string
+          balloon_palette_id: string | null
           balloon_options: Json
           created_at: string
           description: string | null
@@ -409,6 +440,7 @@ export type Database = {
         }
         Insert: {
           category_id: string
+          balloon_palette_id?: string | null
           balloon_options?: Json
           created_at?: string
           description?: string | null
@@ -439,6 +471,7 @@ export type Database = {
         }
         Update: {
           category_id?: string
+          balloon_palette_id?: string | null
           balloon_options?: Json
           created_at?: string
           description?: string | null
@@ -468,6 +501,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "products_balloon_palette_id_fkey"
+            columns: ["balloon_palette_id"]
+            isOneToOne: false
+            referencedRelation: "decoration_content_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_category_id_fkey"
             columns: ["category_id"]

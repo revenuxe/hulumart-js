@@ -16,6 +16,7 @@ type SubcategoryOption = { id: string; name: string; category_id: string };
 type AddonOption = { id: string; name: string; price: number };
 type BalloonOption = { name: string; colors: string[] };
 type ProductFaq = { question: string; answer: string };
+type BalloonPaletteOption = { id: string; name: string; pairs: { id: string; color1: { name: string; hex: string }; color2: { name: string; hex: string } }[] };
 
 const TABS = [
   { key: "details", label: "Details" },
@@ -43,6 +44,7 @@ export function ProductForm({
   selectedAddonIds: initialSelectedAddonIds,
   defaultCategoryId,
   defaultSubcategoryId,
+  balloonPalettes = [],
 }: {
   /** null = creating a new product */
   product: ProductRow | null;
@@ -56,6 +58,7 @@ export function ProductForm({
   /** Pre-selects category/subcategory when arriving from the sidebar's "+" shortcut. */
   defaultCategoryId?: string;
   defaultSubcategoryId?: string;
+  balloonPalettes?: BalloonPaletteOption[];
 }) {
   const router = useRouter();
   const isNew = !product;
@@ -88,6 +91,7 @@ export function ProductForm({
   const [balloonOptions, setBalloonOptions] = useState<BalloonOption[]>(
     (product?.balloon_options as unknown as BalloonOption[] | undefined) ?? [],
   );
+  const [balloonPaletteId, setBalloonPaletteId] = useState(product?.balloon_palette_id ?? "");
   const [faqs, setFaqs] = useState<ProductFaq[]>(
     (product?.faqs as unknown as ProductFaq[] | undefined) ?? [],
   );
@@ -187,6 +191,7 @@ export function ProductForm({
       included: included.map((i) => i.trim()).filter(Boolean),
       not_included: notIncluded.map((i) => i.trim()).filter(Boolean),
       balloon_options: balloonOptions.filter((option) => option.name.trim() && option.colors.length),
+      balloon_palette_id: balloonPaletteId || null,
       faqs: faqs.filter((faq) => faq.question.trim() && faq.answer.trim()),
       delivery_info: deliveryInfo.trim() || null,
       care_info: careInfo.trim() || null,
@@ -433,15 +438,23 @@ export function ProductForm({
                 </div>
               </div>
 
-              <ContentSection icon={Palette} title="Balloon colour choices" description="Shown beneath the gallery. Add a palette name and its colours, separated by commas.">
-                {balloonOptions.map((option, i) => (
+              <ContentSection icon={Palette} title="Balloon Palette" description="Assign one reusable balloon palette, or leave it unassigned for products without balloon decoration.">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                  <label className="block text-xs font-bold uppercase tracking-wide text-muted-foreground">Reusable Balloon Palette</label>
+                  <select value={balloonPaletteId} onChange={(e) => setBalloonPaletteId(e.target.value)} className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
+                    <option value="">No balloon palette</option>
+                    {balloonPalettes.map((palette) => <option key={palette.id} value={palette.id}>{palette.name}</option>)}
+                  </select>
+                  {balloonPaletteId && (() => { const palette = balloonPalettes.find((item) => item.id === balloonPaletteId); return palette ? <div className="mt-3 flex flex-wrap gap-2">{palette.pairs.slice(0, 4).map((pair) => <span key={pair.id} className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-1 text-xs"><i className="h-3 w-3 rounded-full border" style={{ backgroundColor: pair.color1.hex }} />{pair.color1.name}<span>+</span><i className="h-3 w-3 rounded-full border" style={{ backgroundColor: pair.color2.hex }} />{pair.color2.name}</span>)}{palette.pairs.length > 4 && <span className="self-center text-xs text-muted-foreground">+ {palette.pairs.length - 4} more pairs</span>}</div> : null; })()}
+                </div>
+                {false && balloonOptions.map((option, i) => (
                   <div key={i} className="grid gap-2 sm:grid-cols-[1fr_1.5fr_auto]">
                     <input value={option.name} onChange={(e) => updateBalloon(i, "name", e.target.value)} placeholder="e.g. Pink · White · Rosegold" className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" />
                     <input value={option.colors.join(", ")} onChange={(e) => updateBalloon(i, "colors", e.target.value)} placeholder="pink, white, #d8a1a8" className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" />
                     <button type="button" onClick={() => setBalloonOptions((items) => items.filter((_, idx) => idx !== i))} className="grid h-10 w-10 place-items-center rounded-xl border border-border text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 ))}
-                <ContentAddButton label="Add colour palette" onClick={() => setBalloonOptions((items) => [...items, { name: "", colors: [] }])} />
+                {false && <ContentAddButton label="Add colour palette" onClick={() => setBalloonOptions((items) => [...items, { name: "", colors: [] }])} />}
               </ContentSection>
 
               <ContentSection icon={Check} title="Not included" description="Use this for items customers often assume are part of the package.">

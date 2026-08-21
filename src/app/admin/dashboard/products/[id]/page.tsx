@@ -11,6 +11,7 @@ type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 type CategoryOption = { id: string; name: string };
 type SubcategoryOption = { id: string; name: string; category_id: string };
 type AddonOption = { id: string; name: string; price: number };
+type BalloonPaletteOption = { id: string; name: string; pairs: { id: string; color1: { name: string; hex: string }; color2: { name: string; hex: string } }[] };
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,11 +21,12 @@ export default function EditProductPage() {
   const [allTags, setAllTags] = useState<string[]>([]);
   const [allAddons, setAllAddons] = useState<AddonOption[]>([]);
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  const [balloonPalettes, setBalloonPalettes] = useState<BalloonPaletteOption[]>([]);
 
   useEffect(() => {
     (async () => {
       const supabase = createClient();
-      const [{ data: prod }, { data: cats }, { data: subs }, { data: products }, { data: addons }, { data: links }] =
+      const [{ data: prod }, { data: cats }, { data: subs }, { data: products }, { data: addons }, { data: links }, { data: paletteRows }] =
         await Promise.all([
           supabase.from("products").select("*").eq("id", id).single(),
           supabase.from("categories").select("id,name").order("name"),
@@ -32,6 +34,7 @@ export default function EditProductPage() {
           supabase.from("products").select("tags"),
           supabase.from("addons").select("id,name,price").order("sort_order"),
           supabase.from("product_addon_links").select("addon_id").eq("product_id", id),
+          supabase.from("decoration_content_items").select("id,name,content").eq("kind", "balloon_palette").eq("is_active", true).order("name"),
         ]);
       setProduct(prod ?? null);
       setCategories(cats ?? []);
@@ -41,6 +44,7 @@ export default function EditProductPage() {
       setAllTags(Array.from(tagSet).sort());
       setAllAddons(addons ?? []);
       setSelectedAddonIds((links ?? []).map((l) => l.addon_id));
+      setBalloonPalettes(((paletteRows ?? []) as unknown as { id: string; name: string; content: { pairs?: BalloonPaletteOption["pairs"] } }[]).map((palette) => ({ id: palette.id, name: palette.name, pairs: palette.content.pairs ?? [] })));
     })();
   }, [id]);
 
@@ -55,6 +59,7 @@ export default function EditProductPage() {
       allTags={allTags}
       allAddons={allAddons}
       selectedAddonIds={selectedAddonIds}
+      balloonPalettes={balloonPalettes}
     />
   );
 }
