@@ -96,9 +96,10 @@ const getCatalog = unstable_cache(
         reviewCount: p.review_count,
         included: p.included,
         notIncluded: p.not_included,
-        balloonOptions: paletteOptions.length ? paletteOptions : (p.balloon_options as unknown as BalloonOption[]).filter(
-          (option) => option?.name && Array.isArray(option.colors),
-        ),
+        // Storefront balloon choices come only from a selected reusable
+        // palette. Products without one must not render an empty/legacy
+        // balloon section.
+        balloonOptions: p.balloon_palette_id ? paletteOptions : [],
         faqs: (p.faqs as unknown as ProductFaq[]).filter((faq) => faq?.question && faq?.answer),
         deliveryInfo: p.delivery_info ?? undefined,
         careInfo: p.care_info ?? undefined,
