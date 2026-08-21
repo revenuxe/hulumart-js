@@ -17,6 +17,9 @@ type SubcategoryOption = { id: string; name: string; category_id: string };
 type Selection = { type: "all" } | { type: "category"; id: string } | { type: "subcategory"; id: string };
 
 const PRODUCTS_DIRECTORY_QUERY_KEY = ["admin", "products-directory"];
+const EMPTY_PRODUCTS: ProductRow[] = [];
+const EMPTY_CATEGORIES: CategoryOption[] = [];
+const EMPTY_SUBCATEGORIES: SubcategoryOption[] = [];
 
 async function fetchProductsDirectory() {
   const supabase = createClient();
@@ -39,9 +42,9 @@ export default function ProductsPage() {
     queryKey: PRODUCTS_DIRECTORY_QUERY_KEY,
     queryFn: fetchProductsDirectory,
   });
-  const rows = directory?.products ?? [];
-  const categories = directory?.categories ?? [];
-  const subcategories = directory?.subcategories ?? [];
+  const rows = directory?.products ?? EMPTY_PRODUCTS;
+  const categories = directory?.categories ?? EMPTY_CATEGORIES;
+  const subcategories = directory?.subcategories ?? EMPTY_SUBCATEGORIES;
   const [query, setQuery] = useState("");
   const [treeQuery, setTreeQuery] = useState("");
   const [selection, setSelection] = useState<Selection>({ type: "all" });
