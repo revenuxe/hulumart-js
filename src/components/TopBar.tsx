@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Headphones, MapPin, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import { ChevronDown, Headphones, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import logo from "@/assets/zapiboo-logo-cropped.webp";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { useCart } from "@/lib/cart-store";
@@ -55,9 +55,6 @@ export function TopBar() {
     <header className={`${home ? "sticky md:fixed" : "sticky"} inset-x-0 top-0 z-40 border-b border-[#e8edf3] bg-white shadow-sm`}>
       <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-4 px-4 md:px-8">
         <Link href="/" aria-label="Zapiboo home" className="flex h-16 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"><Image src={logo} alt="Zapiboo — Play, Laugh, Discover" priority width={109} height={64} className="h-16 w-[109px] object-contain" /></Link>
-        <button className="hidden items-center gap-1.5 rounded-xl border border-[#dfe6ee] px-3 py-2 text-left text-xs text-muted-foreground md:flex">
-          <MapPin className="h-4 w-4 shrink-0 text-accent" /><span className="whitespace-nowrap">Deliver to <b className="text-sm text-foreground">Bangalore</b></span><ChevronDown className="ml-1 h-3.5 w-3.5" />
-        </button>
         <button onClick={() => setSearchOpen(true)} className="hidden h-11 max-w-[480px] flex-1 items-center gap-3 rounded-xl border border-[#dfe6ee] bg-[#f8fafc] px-4 text-left text-sm text-muted-foreground md:flex">
           <Search className="h-5 w-5" /> Search decorations, themes and occasions...
         </button>

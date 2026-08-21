@@ -12,13 +12,13 @@ export function CategoryCard({ href, image, name, tagline }: { href: string; ima
         {image ? <Image src={image} alt={tagline ? `${name} — ${tagline}` : name} fill loading="lazy" sizes="(min-width: 768px) 16vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-110" /> : <div className="h-full w-full bg-gradient-brand" />}
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/30 to-transparent" />
       </div>
-      <div className="flex min-h-[68px] items-center gap-1.5 px-3 py-2.5 md:min-h-[82px] md:gap-2 md:px-4 md:py-3">
+      <div className="flex min-h-[68px] items-center gap-1.5 px-3 py-2.5 md:min-h-[70px] md:px-3 md:py-2.5">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-[12px] font-bold text-primary md:text-[15px]">{name}</h3>
-          <p className="mt-0.5 truncate text-[10px] text-muted-foreground md:text-xs">{tagline || "Explore themed setups"}</p>
+          <h3 className="truncate text-[12px] font-bold text-primary md:text-[13px]">{name}</h3>
+          <p className="mt-0.5 truncate text-[10px] text-muted-foreground md:text-[11px]">{tagline || "Explore themed setups"}</p>
         </div>
-        <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/8 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground md:h-9 md:w-9">
-          <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 md:h-4 md:w-4" />
+        <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/8 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+          <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </span>
       </div>
     </Link>
