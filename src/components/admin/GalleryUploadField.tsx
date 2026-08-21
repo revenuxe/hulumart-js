@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, GripVertical, ImagePlus, Loader2, Star, X } from "lucide-react";
+import { GripVertical, ImagePlus, Loader2, Star, X } from "lucide-react";
 import { deleteCatalogImage, uploadCatalogImage } from "@/lib/s3-upload-client";
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -15,7 +15,6 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
-  const [selectionStatus, setSelectionStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pastedUrl, setPastedUrl] = useState("");
   const [isDragging, setIsDragging] = useState(false);
@@ -29,8 +28,6 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
     const availableSlots = MAX_IMAGES - value.length;
     const selected = Array.from(files).slice(0, Math.max(availableSlots, 0));
     if (!selected.length) return setError(`A product can have up to ${MAX_IMAGES} photos.`);
-
-    setSelectionStatus(`${selected.length} photo${selected.length === 1 ? "" : "s"} selected`);
 
     const tooLarge = selected.filter((file) => file.size > MAX_IMAGE_BYTES);
     const eligible = selected.filter((file) => file.size > 0 && file.size <= MAX_IMAGE_BYTES);
@@ -52,9 +49,6 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
         }
       }
       if (uploaded.length) onChange([...value, ...uploaded]);
-      if (uploaded.length) {
-        setSelectionStatus(`${uploaded.length} photo${uploaded.length === 1 ? "" : "s"} added to the gallery`);
-      }
       if (messages.length) setError(messages.join(". "));
     } finally {
       setUploadStatus("");
@@ -158,9 +152,6 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
       )}
 
       {uploadStatus && <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary"><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadStatus}</p>}
-      {selectionStatus && !uploadStatus && <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><Check className="h-3.5 w-3.5" /> {selectionStatus}</p>}
-      {value.length > 0 && !uploading && <p className="inline-flex items-center gap-1.5 text-xs text-emerald-700"><Check className="h-3.5 w-3.5" /> Gallery ready — the first image will be used across product listings.</p>}
-
       <div className="flex gap-2">
         <input type="url" value={pastedUrl} onChange={(event) => setPastedUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addUrl(); } }} placeholder="Or paste a public image URL" className="flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary" />
         <button type="button" onClick={addUrl} disabled={uploading || value.length >= MAX_IMAGES} className="shrink-0 rounded-xl border border-border bg-card px-4 py-2 text-sm font-bold disabled:opacity-50">Add URL</button>
