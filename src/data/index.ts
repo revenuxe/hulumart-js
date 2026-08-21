@@ -18,14 +18,24 @@ type Catalog = {
 const getCatalog = unstable_cache(
   async (): Promise<Catalog> => {
     const supabase = publicSupabaseClient();
-    const [{ data: categoryRows }, { data: subcategoryRows }, { data: productRows }] = await Promise.all([
+    const [{ data: categoryRows, error: categoriesError }, { data: subcategoryRows, error: subcategoriesError }, { data: productRows, error: productsError }, { data: paletteRows, error: palettesError }] = await Promise.all([
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("subcategories").select("*, categories(slug)").order("sort_order"),
       supabase
         .from("products")
-        .select("*, categories(slug), subcategories(slug), product_addon_links(addons(*)), decoration_content_items(id,name,content)")
+        .select("*, categories(slug), subcategories(slug), product_addon_links(addons(*))")
         .order("sort_order"),
+      supabase.from("decoration_content_items").select("id,name,content").eq("kind", "balloon_palette").eq("is_active", true),
     ]);
+    // Do not silently turn a failed catalog query into an empty catalog: that
+    // would make every public product route look like a 404.
+    if (categoriesError || subcategoriesError || productsError || palettesError) {
+      throw categoriesError ?? subcategoriesError ?? productsError ?? palettesError;
+    }
+    const paletteById = new Map(
+      ((paletteRows ?? []) as unknown as { id: string; name: string; content: { pairs?: { color1?: { name?: string; hex?: string }; color2?: { name?: string; hex?: string } }[] } }[])
+        .map((palette) => [palette.id, palette]),
+    );
 
     const categories: DecorCategory[] = (categoryRows ?? []).map((c) => ({
       id: c.id,
@@ -50,7 +60,9 @@ const getCatalog = unstable_cache(
     }));
 
     const services: DecorService[] = (productRows ?? []).map((p) => {
-      const palette = (p as typeof p & { decoration_content_items: { name: string; content: { pairs?: { color1?: { name?: string; hex?: string }; color2?: { name?: string; hex?: string } }[] } } | null }).decoration_content_items;
+      // One batched lookup for every palette avoids an N+1 public-product
+      // query and does not rely on PostgREST's relationship schema cache.
+      const palette = p.balloon_palette_id ? paletteById.get(p.balloon_palette_id) : undefined;
       const paletteOptions: BalloonOption[] = (palette?.content.pairs ?? []).flatMap((pair) => {
         const colors = [pair.color1?.hex, pair.color2?.hex].filter((color): color is string => !!color);
         const names = [pair.color1?.name, pair.color2?.name].filter(Boolean);
