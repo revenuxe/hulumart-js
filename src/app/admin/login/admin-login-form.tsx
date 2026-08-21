@@ -6,9 +6,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Lock, Mail, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 
+const ADMIN_EMAIL = "admin@zapiboo.com";
+
 export function AdminLoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(ADMIN_EMAIL);
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -54,7 +56,7 @@ export function AdminLoginForm() {
           </div>
           <h1 className="mt-4 font-display text-3xl leading-tight">Admin sign-in</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Restricted access. Sign in with your Decor Eventz admin account.
+            Restricted access. Sign in with your Zapiboo admin account.
           </p>
 
           <form onSubmit={submit} className="mt-6 space-y-3">
@@ -65,7 +67,7 @@ export function AdminLoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Admin email"
+                placeholder={ADMIN_EMAIL}
                 className="w-full bg-transparent py-3 text-sm outline-none"
               />
             </label>

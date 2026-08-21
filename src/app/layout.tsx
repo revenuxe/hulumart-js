@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     "corporate event decoration India",
   ],
   authors: [{ name: SITE_NAME }],
-  icons: { icon: "/zapiboo-logo-cropped.webp", shortcut: "/zapiboo-logo-cropped.webp" },
+  icons: { icon: "/favicon.ico", shortcut: "/favicon.ico" },
   alternates: { canonical: "/" },
   openGraph: {
     title: SITE_TITLE,
