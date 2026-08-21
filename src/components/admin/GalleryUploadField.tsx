@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import { Check, GripVertical, ImagePlus, Loader2, Star, X } from "lucide-react";
 import { deleteCatalogImage, uploadCatalogImage } from "@/lib/s3-upload-client";
 
@@ -13,7 +13,6 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
   pathPrefix: string;
   onUploadingChange?: (uploading: boolean) => void;
 }) {
-  const inputId = useId();
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -121,14 +120,31 @@ export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingCha
             </div>
           ))}
           {value.length < MAX_IMAGES && (
-            <label htmlFor={inputId} aria-disabled={uploading} className="flex h-28 w-28 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-background text-primary transition hover:border-primary hover:bg-primary/5 aria-disabled:pointer-events-none aria-disabled:opacity-60">
+            <div className="flex h-28 w-28 shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-background text-primary">
               {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
-              <span className="text-xs font-bold">{uploading ? "Uploading" : "Add photos"}</span>
-            </label>
+              <span className="text-center text-xs font-bold">{uploading ? "Uploading" : "Choose below"}</span>
+            </div>
           )}
         </div>
-        <input id={inputId} type="file" accept="image/*" multiple className="hidden" onChange={(event) => { const files = event.target.files; event.target.value = ""; if (files?.length) void handleFiles(files); }} />
       </div>
+
+      {value.length < MAX_IMAGES && (
+        <label className="block rounded-xl border border-border bg-background px-3 py-2.5 text-sm font-semibold text-foreground">
+          <span className="mb-1.5 block text-xs text-muted-foreground">Choose product images</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={uploading}
+            className="block w-full cursor-pointer text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-bold file:text-primary-foreground hover:file:brightness-110 disabled:cursor-not-allowed"
+            onChange={(event) => {
+              const files = event.target.files;
+              event.target.value = "";
+              if (files?.length) void handleFiles(files);
+            }}
+          />
+        </label>
+      )}
 
       {uploadStatus && <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary"><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadStatus}</p>}
       {value.length > 0 && !uploading && <p className="inline-flex items-center gap-1.5 text-xs text-emerald-700"><Check className="h-3.5 w-3.5" /> Gallery ready — the first image will be used across product listings.</p>}
