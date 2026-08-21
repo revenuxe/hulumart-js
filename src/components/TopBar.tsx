@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,6 +9,8 @@ import logo from "@/assets/zapiboo-logo-cropped.webp";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { useCart } from "@/lib/cart-store";
 import { useMegaMenuData } from "@/lib/use-mega-menu-data";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const NAV_ITEMS = [
   { label: "Birthday", slug: "birthday" }, { label: "Anniversary", slug: "anniversary" }, { label: "Baby Shower", slug: "baby-shower" }, { label: "Kids Special", slug: "kids" }, { label: "Wedding Decor", slug: "wedding" }, { label: "Corporate", slug: "corporate" }, { label: "Kids Activities", slug: "kids-activities" },
@@ -20,6 +22,8 @@ export function TopBar() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenu, setMobileMenu] = useState<string | null>(null);
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [supabase] = useState(() => createClient());
   const closeTimer = useRef<number | null>(null);
   const { itemCount } = useCart();
   const { subcategories, products } = useMegaMenuData(true);
@@ -29,6 +33,23 @@ export function TopBar() {
   const mobileItem = NAV_ITEMS.find((item) => item.slug === mobileMenu);
   const mobileSubcategories = subcategories.filter((subcategory) => subcategory.categorySlug === mobileMenu);
   const mobileProducts = products.filter((product) => product.categorySlug === mobileMenu).slice(0, 4);
+
+  useEffect(() => {
+    let active = true;
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (active) setUser(user);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   return (
     <header className={`${home ? "sticky md:fixed" : "sticky"} inset-x-0 top-0 z-40 border-b border-[#e8edf3] bg-white shadow-sm`}>
@@ -43,7 +64,7 @@ export function TopBar() {
         <div className="ml-auto flex items-center gap-2 md:gap-5">
           <button onClick={() => setSearchOpen(true)} aria-label="Search decorations" className="grid h-10 w-10 place-items-center rounded-full text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"><Search className="h-5 w-5" /></button>
           <Link href="/contact" className="hidden items-center gap-2 text-sm font-medium text-primary md:flex"><Headphones className="h-5 w-5" /> Support</Link>
-          <Link href="/auth" className="hidden items-center gap-2 text-sm font-semibold text-primary md:flex"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#edf7f8] text-accent"><UserRound className="h-4 w-4" /></span> Sign in</Link>
+          <Link href={user ? "/profile" : "/auth?redirect=%2Fprofile"} className="hidden items-center gap-2 text-sm font-semibold text-primary md:flex"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#edf7f8] text-accent"><UserRound className="h-4 w-4" /></span> {user ? "My account" : "Sign in"}</Link>
           <Link href="/cart" aria-label="Cart" className="relative grid h-10 w-10 place-items-center rounded-full text-primary"><ShoppingBag className="h-5 w-5" />{itemCount > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">{itemCount}</span>}</Link>
         </div>
       </div>
