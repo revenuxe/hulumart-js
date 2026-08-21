@@ -22,10 +22,23 @@ export function GalleryUploadField({
     setUploading(true);
     setError(null);
     try {
-      const uploaded = await Promise.all(
+      const results = await Promise.allSettled(
         Array.from(files).map((file) => uploadCatalogImage(file, pathPrefix)),
       );
-      onChange([...value, ...uploaded]);
+      const uploaded = results
+        .filter((result): result is PromiseFulfilledResult<string> => result.status === "fulfilled")
+        .map((result) => result.value);
+      if (uploaded.length) onChange([...value, ...uploaded]);
+
+      const failures = results.filter(
+        (result): result is PromiseRejectedResult => result.status === "rejected",
+      );
+      if (failures.length) {
+        const firstMessage = failures[0].reason instanceof Error ? failures[0].reason.message : "Upload failed";
+        setError(
+          `${failures.length} image${failures.length === 1 ? "" : "s"} could not upload. ${firstMessage}`,
+        );
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -103,6 +116,7 @@ export function GalleryUploadField({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
+          aria-label="Upload product images"
           className="grid h-24 w-24 shrink-0 place-items-center rounded-xl border border-dashed border-border text-muted-foreground disabled:opacity-60"
         >
           {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
@@ -137,6 +151,9 @@ export function GalleryUploadField({
           Add
         </button>
       </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Upload JPEG, PNG, WebP, GIF, BMP, or HEIC images up to 4 MB each.
+      </p>
       {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
     </div>
   );

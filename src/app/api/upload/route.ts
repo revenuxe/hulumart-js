@@ -22,6 +22,19 @@ async function requireAdmin() {
   return isAdmin ? user : null;
 }
 
+function storageErrorMessage(error: unknown, action: "upload" | "delete") {
+  const name = error && typeof error === "object" && "name" in error
+    ? String(error.name)
+    : "";
+
+  if (name === "AccessDenied") {
+    return `S3 denied the ${action}. Check the AWS IAM policy allows s3:${action === "upload" ? "PutObject" : "DeleteObject"} for this bucket.`;
+  }
+  if (name === "NoSuchBucket") return "The configured S3 bucket could not be found.";
+  if (name === "PermanentRedirect") return "The configured AWS region does not match the S3 bucket region.";
+  return `Could not ${action} the image. Check the AWS S3 environment variables and try again.`;
+}
+
 export async function POST(request: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -40,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing file or pathPrefix" }, { status: 400 });
     }
     if (file.size === 0 || file.size > MAX_IMAGE_UPLOAD_BYTES) {
-      return NextResponse.json({ error: "Images must be 10 MB or smaller." }, { status: 400 });
+      return NextResponse.json({ error: "Images must be 4 MB or smaller." }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -68,7 +81,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: s3PublicUrl(key) });
   } catch (err) {
     console.error("[api/upload POST]", err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Upload failed" }, { status: 500 });
+    return NextResponse.json({ error: storageErrorMessage(err, "upload") }, { status: 500 });
   }
 }
 
@@ -88,6 +101,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[api/upload DELETE]", err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Delete failed" }, { status: 500 });
+    return NextResponse.json({ error: storageErrorMessage(err, "delete") }, { status: 500 });
   }
 }

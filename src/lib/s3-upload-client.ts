@@ -11,8 +11,20 @@ export async function uploadCatalogImage(file: File, pathPrefix: string): Promis
   form.append("pathPrefix", pathPrefix);
 
   const res = await fetch("/api/upload", { method: "POST", body: form });
-  const data = (await res.json()) as { url?: string; error?: string };
-  if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed");
+  const body = await res.text();
+  let data: { url?: string; error?: string } = {};
+  try {
+    data = JSON.parse(body) as { url?: string; error?: string };
+  } catch {
+    // Vercel can reject a request before it reaches the route handler (for
+    // example, because it exceeds the function body limit), returning HTML.
+  }
+  if (!res.ok || !data.url) {
+    const fallback = res.status === 413
+      ? "The image is too large for the upload service. Choose a smaller image and try again."
+      : `Upload failed (${res.status || "network error"}). Please try again.`;
+    throw new Error(data.error ?? fallback);
+  }
   return data.url;
 }
 

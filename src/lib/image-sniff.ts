@@ -1,7 +1,10 @@
-/** Files pass through a server route before reaching S3. Keep a generous
- * ceiling for high-resolution phone photos while protecting serverless
- * functions from buffering unexpectedly large requests in memory. */
-export const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
+/**
+ * Files currently pass through a Vercel Function before reaching S3. Vercel
+ * limits Function request bodies to 4.5 MB, so leave headroom for multipart
+ * form data and reject files that would otherwise be rejected before our
+ * route can return a useful error.
+ */
+export const MAX_IMAGE_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 /** Returns the verified image MIME type from magic bytes. This avoids storing
  * a file under a browser-supplied content type and rejects generic RIFF files
