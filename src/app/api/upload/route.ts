@@ -3,7 +3,14 @@ import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { createClient } from "@/lib/supabase/server";
 import { getS3Client, getS3Config } from "@/lib/s3";
 import { s3PublicUrl, s3KeyFromUrl } from "@/lib/s3-url";
-import { looksLikeImage, sanitizeFileName } from "@/lib/image-sniff";
+import {
+  detectedImageMimeType,
+  MAX_IMAGE_UPLOAD_BYTES,
+  sanitizeFileName,
+  sanitizeObjectPrefix,
+} from "@/lib/image-sniff";
+
+export const runtime = "nodejs";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -28,26 +35,33 @@ export async function POST(request: NextRequest) {
     const form = await request.formData();
     const file = form.get("file");
     const pathPrefix = form.get("pathPrefix");
-    if (!(file instanceof File) || typeof pathPrefix !== "string" || !pathPrefix) {
+    const safePathPrefix = typeof pathPrefix === "string" ? sanitizeObjectPrefix(pathPrefix) : null;
+    if (!(file instanceof File) || !safePathPrefix) {
       return NextResponse.json({ error: "Missing file or pathPrefix" }, { status: 400 });
+    }
+    if (file.size === 0 || file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      return NextResponse.json({ error: "Images must be 10 MB or smaller." }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    if (!looksLikeImage(buffer)) {
+    const contentType = detectedImageMimeType(buffer);
+    if (!contentType) {
       return NextResponse.json(
         { error: `"${file.name}" doesn't look like a valid image — try saving the photo again` },
         { status: 400 },
       );
     }
 
-    const key = `${pathPrefix}/${Date.now()}-${sanitizeFileName(file.name)}`;
+    const key = `${safePathPrefix}/${Date.now()}-${sanitizeFileName(file.name)}`;
     const { bucketName } = getS3Config();
     await getS3Client().send(
       new PutObjectCommand({
         Bucket: bucketName,
         Key: key,
         Body: buffer,
-        ContentType: file.type || "application/octet-stream",
+        ContentType: contentType,
+        CacheControl: "public, max-age=31536000, immutable",
+        ContentDisposition: "inline",
       }),
     );
 

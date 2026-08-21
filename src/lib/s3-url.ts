@@ -14,12 +14,15 @@ export function s3PublicUrl(key: string): string {
 /** Reverses s3PublicUrl — extracts the object key back out of either URL
  * shape, so deletes work regardless of which one produced the stored URL. */
 export function s3KeyFromUrl(url: string): string | null {
-  const { region } = getS3Config();
+  const { region, bucketName } = getS3Config();
   const base = process.env.AWS_S3_PUBLIC_URL?.replace(/\/+$/, "");
   if (base && url.startsWith(base + "/")) return decodeURIComponent(url.slice(base.length + 1));
 
-  const marker = `.s3.${region}.amazonaws.com/`;
-  const idx = url.indexOf(marker);
-  if (idx === -1) return null;
-  return decodeURIComponent(url.slice(idx + marker.length));
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== `${bucketName}.s3.${region}.amazonaws.com`) return null;
+    return decodeURIComponent(parsed.pathname.replace(/^\/+/, "")) || null;
+  } catch {
+    return null;
+  }
 }

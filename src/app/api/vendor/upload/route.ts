@@ -3,7 +3,9 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { createClient } from "@/lib/supabase/server";
 import { getS3Client, getS3Config } from "@/lib/s3";
 import { s3PublicUrl } from "@/lib/s3-url";
-import { looksLikeImage, sanitizeFileName } from "@/lib/image-sniff";
+import { detectedImageMimeType, MAX_IMAGE_UPLOAD_BYTES, sanitizeFileName } from "@/lib/image-sniff";
+
+export const runtime = "nodejs";
 
 // Unlike api/upload/route.ts (admin-only, trusts any pathPrefix an admin
 // supplies), this route builds the S3 key itself from a booking id it has
@@ -53,12 +55,16 @@ export async function POST(request: NextRequest) {
     if (kind !== "decoration" && kind !== "team") {
       return NextResponse.json({ error: "Invalid upload kind" }, { status: 400 });
     }
+    if (file.size === 0 || file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      return NextResponse.json({ error: "Images must be 10 MB or smaller." }, { status: 400 });
+    }
 
     const vendor = await requireVendorForBooking(bookingId);
     if (!vendor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    if (!looksLikeImage(buffer)) {
+    const contentType = detectedImageMimeType(buffer);
+    if (!contentType) {
       return NextResponse.json(
         { error: `"${file.name}" doesn't look like a valid image — try saving the photo again` },
         { status: 400 },
@@ -72,7 +78,9 @@ export async function POST(request: NextRequest) {
         Bucket: bucketName,
         Key: key,
         Body: buffer,
-        ContentType: file.type || "application/octet-stream",
+        ContentType: contentType,
+        CacheControl: "private, max-age=31536000, immutable",
+        ContentDisposition: "inline",
       }),
     );
 
