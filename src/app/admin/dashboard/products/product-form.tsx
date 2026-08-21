@@ -102,6 +102,7 @@ export function ProductForm({
   const [ogImageUrl, setOgImageUrl] = useState<string | null>(product?.og_image_url ?? null);
 
   const [saving, setSaving] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const categorySubcategories = useMemo(
@@ -162,6 +163,14 @@ export function ProductForm({
       setTab("pricing");
       return setError("Sale price can't be higher than the regular price");
     }
+    if (images.length === 0) {
+      setTab("media");
+      return setError("Add at least one product image before publishing.");
+    }
+    if (uploadingImages) {
+      setTab("media");
+      return setError("Wait for image uploads to finish before saving.");
+    }
 
     setSaving(true);
     const supabase = createClient();
@@ -206,11 +215,21 @@ export function ProductForm({
     const productId = savedProduct.id;
     // Simplest correct approach for a short link list: replace wholesale
     // rather than diffing inserts/updates/deletes.
-    await supabase.from("product_addon_links").delete().eq("product_id", productId);
+    const { error: deleteLinksError } = await supabase.from("product_addon_links").delete().eq("product_id", productId);
+    if (deleteLinksError) {
+      setError("Product was saved, but its add-ons could not be updated. Please try saving again.");
+      setSaving(false);
+      return;
+    }
     if (selectedAddonIds.length) {
-      await supabase.from("product_addon_links").insert(
+      const { error: addLinksError } = await supabase.from("product_addon_links").insert(
         selectedAddonIds.map((addonId) => ({ product_id: productId, addon_id: addonId })),
       );
+      if (addLinksError) {
+        setError("Product was saved, but its add-ons could not be updated. Please try saving again.");
+        setSaving(false);
+        return;
+      }
     }
 
     setSaving(false);
@@ -377,6 +396,7 @@ export function ProductForm({
               value={images}
               onChange={setImages}
               pathPrefix={`products/${product?.id ?? "new"}`}
+              onUploadingChange={setUploadingImages}
             />
           )}
 
@@ -558,11 +578,11 @@ export function ProductForm({
           </Link>
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || uploadingImages}
             className="inline-flex items-center gap-1.5 rounded-full bg-gradient-brand px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-60"
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            {isNew ? "Create product" : "Save changes"}
+            {saving || uploadingImages ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {uploadingImages ? "Uploading images" : isNew ? "Create product" : "Save changes"}
           </button>
         </div>
       </div>

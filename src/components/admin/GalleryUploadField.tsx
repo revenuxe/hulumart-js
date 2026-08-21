@@ -1,66 +1,85 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { GripVertical, Loader2, Plus, X } from "lucide-react";
+import { Check, GripVertical, ImagePlus, Loader2, Star, X } from "lucide-react";
 import { deleteCatalogImage, uploadCatalogImage } from "@/lib/s3-upload-client";
 
-export function GalleryUploadField({
-  value,
-  onChange,
-  pathPrefix,
-}: {
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_IMAGES = 8;
+
+export function GalleryUploadField({ value, onChange, pathPrefix, onUploadingChange }: {
   value: string[];
   onChange: (urls: string[]) => void;
   pathPrefix: string;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pastedUrl, setPastedUrl] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
 
-  async function handleFiles(files: FileList) {
-    setUploading(true);
+  function setUploadState(next: boolean) {
+    setUploading(next);
+    onUploadingChange?.(next);
+  }
+
+  async function handleFiles(files: FileList | File[]) {
+    const availableSlots = MAX_IMAGES - value.length;
+    const selected = Array.from(files).slice(0, Math.max(availableSlots, 0));
+    if (!selected.length) return setError(`A product can have up to ${MAX_IMAGES} photos.`);
+
+    const tooLarge = selected.filter((file) => file.size > MAX_IMAGE_BYTES);
+    const eligible = selected.filter((file) => file.size > 0 && file.size <= MAX_IMAGE_BYTES);
+    const messages: string[] = [];
+    if (tooLarge.length) messages.push(`${tooLarge.length} image${tooLarge.length === 1 ? " is" : "s are"} over 4 MB`);
+
+    setUploadState(true);
     setError(null);
+    const uploaded: string[] = [];
     try {
-      const results = await Promise.allSettled(
-        Array.from(files).map((file) => uploadCatalogImage(file, pathPrefix)),
-      );
-      const uploaded = results
-        .filter((result): result is PromiseFulfilledResult<string> => result.status === "fulfilled")
-        .map((result) => result.value);
-      if (uploaded.length) onChange([...value, ...uploaded]);
-
-      const failures = results.filter(
-        (result): result is PromiseRejectedResult => result.status === "rejected",
-      );
-      if (failures.length) {
-        const firstMessage = failures[0].reason instanceof Error ? failures[0].reason.message : "Upload failed";
-        setError(
-          `${failures.length} image${failures.length === 1 ? "" : "s"} could not upload. ${firstMessage}`,
-        );
+      // Sequential uploads avoid competing serverless requests and provide an
+      // accurate progress message when an admin selects several photos.
+      for (const [index, file] of eligible.entries()) {
+        setUploadStatus(`Uploading ${index + 1} of ${eligible.length}…`);
+        try {
+          uploaded.push(await uploadCatalogImage(file, pathPrefix));
+        } catch (uploadError) {
+          messages.push(uploadError instanceof Error ? uploadError.message : `Could not upload ${file.name}`);
+        }
       }
-    } catch (err) {
-      setError((err as Error).message);
+      if (uploaded.length) onChange([...value, ...uploaded]);
+      if (messages.length) setError(messages.join(". "));
     } finally {
-      setUploading(false);
+      setUploadStatus("");
+      setUploadState(false);
     }
   }
 
   function addUrl() {
     const url = pastedUrl.trim();
     if (!url) return;
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error();
+    } catch {
+      setError("Enter a complete image URL beginning with https:// or http://.");
+      return;
+    }
+    if (value.length >= MAX_IMAGES) return setError(`A product can have up to ${MAX_IMAGES} photos.`);
+    setError(null);
     onChange([...value, url]);
     setPastedUrl("");
   }
 
-  function removeAt(i: number) {
-    const url = value[i];
-    void deleteCatalogImage(url);
-    onChange(value.filter((_, idx) => idx !== i));
+  function removeAt(index: number) {
+    void deleteCatalogImage(value[index]);
+    onChange(value.filter((_, itemIndex) => itemIndex !== index));
   }
 
   function moveTo(from: number, to: number) {
-    if (to < 0 || to >= value.length) return;
+    if (to < 0 || to >= value.length || from === to) return;
     const next = [...value];
     const [moved] = next.splice(from, 1);
     next.splice(to, 0, moved);
@@ -68,93 +87,58 @@ export function GalleryUploadField({
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap gap-3">
-        {value.map((url, i) => (
-          <div
-            key={url + i}
-            className="group relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-border bg-muted"
-          >
-            <img src={url} alt="" className="h-full w-full object-cover" />
-            {i === 0 && (
-              <span className="absolute left-1 top-1 rounded-full bg-gradient-brand px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">
-                Cover
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={() => removeAt(i)}
-              aria-label="Remove image"
-              className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-black/60 text-white"
-            >
-              <X className="h-3 w-3" />
-            </button>
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-black/50 py-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-              <button
-                type="button"
-                onClick={() => moveTo(i, i - 1)}
-                disabled={i === 0}
-                className="grid h-4 w-4 place-items-center text-white disabled:opacity-30"
-                aria-label="Move left"
-              >
-                <GripVertical className="h-3 w-3 -rotate-90" />
-              </button>
-              <button
-                type="button"
-                onClick={() => moveTo(i, i + 1)}
-                disabled={i === value.length - 1}
-                className="grid h-4 w-4 place-items-center text-white disabled:opacity-30"
-                aria-label="Move right"
-              >
-                <GripVertical className="h-3 w-3 rotate-90" />
-              </button>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h3 className="text-sm font-bold">Product gallery</h3>
+          <p className="mt-1 text-xs text-muted-foreground">The first photo is the cover image. Add up to {MAX_IMAGES} photos and drag files here to upload.</p>
+        </div>
+        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground">{value.length}/{MAX_IMAGES} photos</span>
+      </div>
+
+      <div
+        onDragEnter={(event) => { event.preventDefault(); if (!uploading && value.length < MAX_IMAGES) setIsDragging(true); }}
+        onDragOver={(event) => event.preventDefault()}
+        onDragLeave={(event) => { if (event.currentTarget === event.target) setIsDragging(false); }}
+        onDrop={(event) => { event.preventDefault(); setIsDragging(false); if (!uploading) void handleFiles(event.dataTransfer.files); }}
+        className={`rounded-2xl border p-3 transition ${isDragging ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-dashed border-border bg-muted/10"}`}
+      >
+        <div className="flex flex-wrap gap-3">
+          {value.map((url, index) => (
+            <div key={`${url}-${index}`} className="group relative h-28 w-28 shrink-0 overflow-hidden rounded-xl border border-border bg-muted shadow-sm">
+              <img src={url} alt={`Product image ${index + 1}`} className="h-full w-full object-cover" />
+              {index === 0 ? (
+                <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-primary-foreground"><Star className="h-2.5 w-2.5 fill-current" /> Cover</span>
+              ) : (
+                <button type="button" onClick={() => moveTo(index, 0)} className="absolute left-1.5 top-1.5 rounded-full bg-black/65 px-2 py-1 text-[10px] font-bold text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100">Make cover</button>
+              )}
+              <button type="button" onClick={() => removeAt(index)} aria-label={`Remove image ${index + 1}`} className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/65 text-white transition hover:bg-destructive"><X className="h-3.5 w-3.5" /></button>
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-black/65 py-1.5 text-white">
+                <button type="button" onClick={() => moveTo(index, index - 1)} disabled={index === 0} aria-label={`Move image ${index + 1} earlier`} className="rounded p-0.5 disabled:opacity-30"><GripVertical className="h-3.5 w-3.5 -rotate-90" /></button>
+                <span className="text-[10px] font-bold">{index + 1}</span>
+                <button type="button" onClick={() => moveTo(index, index + 1)} disabled={index === value.length - 1} aria-label={`Move image ${index + 1} later`} className="rounded p-0.5 disabled:opacity-30"><GripVertical className="h-3.5 w-3.5 rotate-90" /></button>
+              </div>
             </div>
-          </div>
-        ))}
-
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-          aria-label="Upload product images"
-          className="grid h-24 w-24 shrink-0 place-items-center rounded-xl border border-dashed border-border text-muted-foreground disabled:opacity-60"
-        >
-          {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
-        </button>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            const files = e.target.files;
-            e.target.value = "";
-            if (files && files.length) void handleFiles(files);
-          }}
-        />
+          ))}
+          {value.length < MAX_IMAGES && (
+            <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading} aria-label="Upload product images" className="flex h-28 w-28 shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-background text-primary transition hover:border-primary hover:bg-primary/5 disabled:opacity-60">
+              {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
+              <span className="text-xs font-bold">{uploading ? "Uploading" : "Add photos"}</span>
+            </button>
+          )}
+        </div>
+        <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/heic,image/heif" multiple className="hidden" onChange={(event) => { const files = event.target.files; event.target.value = ""; if (files?.length) void handleFiles(files); }} />
       </div>
 
-      <div className="mt-2 flex gap-2">
-        <input
-          type="text"
-          value={pastedUrl}
-          onChange={(e) => setPastedUrl(e.target.value)}
-          placeholder="…or paste an image URL"
-          className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary"
-        />
-        <button
-          type="button"
-          onClick={addUrl}
-          className="shrink-0 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold"
-        >
-          Add
-        </button>
+      {uploadStatus && <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary"><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadStatus}</p>}
+      {value.length > 0 && !uploading && <p className="inline-flex items-center gap-1.5 text-xs text-emerald-700"><Check className="h-3.5 w-3.5" /> Gallery ready — the first image will be used across product listings.</p>}
+
+      <div className="flex gap-2">
+        <input type="url" value={pastedUrl} onChange={(event) => setPastedUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addUrl(); } }} placeholder="Or paste a public image URL" className="flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary" />
+        <button type="button" onClick={addUrl} disabled={uploading || value.length >= MAX_IMAGES} className="shrink-0 rounded-xl border border-border bg-card px-4 py-2 text-sm font-bold disabled:opacity-50">Add URL</button>
       </div>
-      <p className="mt-2 text-[11px] text-muted-foreground">
-        Upload JPEG, PNG, WebP, GIF, BMP, or HEIC images up to 4 MB each.
-      </p>
-      {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
+      <p className="text-[11px] text-muted-foreground">JPEG, PNG, WebP, GIF, BMP, or HEIC · 4 MB maximum per image.</p>
+      {error && <p role="alert" className="rounded-xl bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">{error}</p>}
     </div>
   );
 }
