@@ -410,6 +410,10 @@ export type Database = {
         Row: {
           category_id: string
           balloon_palette_id: string | null
+          included_group_id: string | null
+          faq_group_id: string | null
+          delivery_group_id: string | null
+          care_group_id: string | null
           balloon_options: Json
           created_at: string
           description: string | null
@@ -441,6 +445,10 @@ export type Database = {
         Insert: {
           category_id: string
           balloon_palette_id?: string | null
+          included_group_id?: string | null
+          faq_group_id?: string | null
+          delivery_group_id?: string | null
+          care_group_id?: string | null
           balloon_options?: Json
           created_at?: string
           description?: string | null
@@ -472,6 +480,10 @@ export type Database = {
         Update: {
           category_id?: string
           balloon_palette_id?: string | null
+          included_group_id?: string | null
+          faq_group_id?: string | null
+          delivery_group_id?: string | null
+          care_group_id?: string | null
           balloon_options?: Json
           created_at?: string
           description?: string | null

@@ -11,15 +11,16 @@ type BalloonPaletteOption = { id: string; name: string; pairs: { id: string; col
 
 async function fetchProductFormOptions() {
   const supabase = createClient();
-  const [{ data: cats, error: categoriesError }, { data: subs, error: subcategoriesError }, { data: products, error: productsError }, { data: addons, error: addonsError }, { data: paletteRows, error: palettesError }] = await Promise.all([
+  const [{ data: cats, error: categoriesError }, { data: subs, error: subcategoriesError }, { data: products, error: productsError }, { data: addons, error: addonsError }, { data: paletteRows, error: palettesError }, { data: contentRows, error: contentError }] = await Promise.all([
     supabase.from("categories").select("id,name").order("name"),
     supabase.from("subcategories").select("id,name,category_id").order("name"),
     supabase.from("products").select("tags"),
     supabase.from("addons").select("id,name,price").order("sort_order"),
     supabase.from("decoration_content_items").select("id,name,content").eq("kind", "balloon_palette").eq("is_active", true).order("name"),
+    supabase.from("decoration_content_items").select("id,name,kind,content").neq("kind", "balloon_palette").eq("is_active", true).order("name"),
   ]);
-  if (categoriesError || subcategoriesError || productsError || addonsError || palettesError) {
-    throw categoriesError ?? subcategoriesError ?? productsError ?? addonsError ?? palettesError;
+  if (categoriesError || subcategoriesError || productsError || addonsError || palettesError || contentError) {
+    throw categoriesError ?? subcategoriesError ?? productsError ?? addonsError ?? palettesError ?? contentError;
   }
   const tagSet = new Set<string>();
   for (const product of products ?? []) for (const tag of product.tags) tagSet.add(tag);
@@ -29,6 +30,7 @@ async function fetchProductFormOptions() {
     allTags: Array.from(tagSet).sort(),
     allAddons: addons ?? [],
     balloonPalettes: ((paletteRows ?? []) as unknown as { id: string; name: string; content: { pairs?: BalloonPaletteOption["pairs"] } }[]).map((palette) => ({ id: palette.id, name: palette.name, pairs: palette.content.pairs ?? [] })),
+    reusableContent: ["included_set", "faq_set", "delivery_note", "care_note"].reduce((groups, kind) => ({ ...groups, [kind]: ((contentRows ?? []) as unknown as { id: string; name: string; kind: string; content: Record<string, unknown> }[]).filter((item) => item.kind === kind) }), {} as Record<string, { id: string; name: string; content: Record<string, unknown> }[]>),
   };
 }
 
@@ -52,6 +54,7 @@ export default function NewProductPage() {
       allTags={options.allTags}
       allAddons={options.allAddons}
       balloonPalettes={options.balloonPalettes}
+      reusableContent={{ included: options.reusableContent.included_set ?? [], faqs: options.reusableContent.faq_set ?? [], delivery: options.reusableContent.delivery_note ?? [], care: options.reusableContent.care_note ?? [] }}
       defaultCategoryId={defaultCategoryId}
       defaultSubcategoryId={defaultSubcategoryId}
     />

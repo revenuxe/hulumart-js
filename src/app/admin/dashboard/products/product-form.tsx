@@ -17,6 +17,7 @@ type AddonOption = { id: string; name: string; price: number };
 type BalloonOption = { name: string; colors: string[] };
 type ProductFaq = { question: string; answer: string };
 type BalloonPaletteOption = { id: string; name: string; pairs: { id: string; color1: { name: string; hex: string }; color2: { name: string; hex: string } }[] };
+type ReusableContentOption = { id: string; name: string; content: Record<string, unknown> };
 
 const TABS = [
   { key: "details", label: "Details" },
@@ -45,6 +46,7 @@ export function ProductForm({
   defaultCategoryId,
   defaultSubcategoryId,
   balloonPalettes = [],
+  reusableContent = { included: [], faqs: [], delivery: [], care: [] },
 }: {
   /** null = creating a new product */
   product: ProductRow | null;
@@ -59,6 +61,7 @@ export function ProductForm({
   defaultCategoryId?: string;
   defaultSubcategoryId?: string;
   balloonPalettes?: BalloonPaletteOption[];
+  reusableContent?: { included: ReusableContentOption[]; faqs: ReusableContentOption[]; delivery: ReusableContentOption[]; care: ReusableContentOption[] };
 }) {
   const router = useRouter();
   const isNew = !product;
@@ -92,6 +95,10 @@ export function ProductForm({
     (product?.balloon_options as unknown as BalloonOption[] | undefined) ?? [],
   );
   const [balloonPaletteId, setBalloonPaletteId] = useState(product?.balloon_palette_id ?? "");
+  const [includedGroupId, setIncludedGroupId] = useState(product?.included_group_id ?? "");
+  const [faqGroupId, setFaqGroupId] = useState(product?.faq_group_id ?? "");
+  const [deliveryGroupId, setDeliveryGroupId] = useState(product?.delivery_group_id ?? "");
+  const [careGroupId, setCareGroupId] = useState(product?.care_group_id ?? "");
   const [faqs, setFaqs] = useState<ProductFaq[]>(
     (product?.faqs as unknown as ProductFaq[] | undefined) ?? [],
   );
@@ -192,6 +199,10 @@ export function ProductForm({
       not_included: notIncluded.map((i) => i.trim()).filter(Boolean),
       balloon_options: balloonOptions.filter((option) => option.name.trim() && option.colors.length),
       balloon_palette_id: balloonPaletteId || null,
+      included_group_id: includedGroupId || null,
+      faq_group_id: faqGroupId || null,
+      delivery_group_id: deliveryGroupId || null,
+      care_group_id: careGroupId || null,
       faqs: faqs.filter((faq) => faq.question.trim() && faq.answer.trim()),
       delivery_info: deliveryInfo.trim() || null,
       care_info: careInfo.trim() || null,
@@ -412,6 +423,14 @@ export function ProductForm({
 
           {tab === "content" && (
             <div className="space-y-6">
+              <ContentSection icon={Palette} title="Reusable product content" description="Select a reusable group, or leave it on Custom to use the fields below for this product only.">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <ContentSourceSelect label="What's Included" value={includedGroupId} onChange={setIncludedGroupId} options={reusableContent.included} />
+                  <ContentSourceSelect label="FAQs" value={faqGroupId} onChange={setFaqGroupId} options={reusableContent.faqs} />
+                  <ContentSourceSelect label="Delivery" value={deliveryGroupId} onChange={setDeliveryGroupId} options={reusableContent.delivery} />
+                  <ContentSourceSelect label="Care Info" value={careGroupId} onChange={setCareGroupId} options={reusableContent.care} />
+                </div>
+              </ContentSection>
               <div>
                 <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                   What&apos;s included
@@ -635,6 +654,10 @@ function ContentSection({ icon: Icon, title, description, children }: { icon: ty
 
 function ContentAddButton({ label, onClick }: { label: string; onClick: () => void }) {
   return <button type="button" onClick={onClick} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold"><Plus className="h-3.5 w-3.5" />{label}</button>;
+}
+
+function ContentSourceSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: ReusableContentOption[] }) {
+  return <label className="block text-xs font-bold uppercase tracking-wide text-muted-foreground">{label}<select value={value} onChange={(event) => onChange(event.target.value)} className="mt-1.5 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm font-normal text-foreground"><option value="">Custom for this product</option>{options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select></label>;
 }
 
 function Toggle({

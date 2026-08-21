@@ -22,11 +22,12 @@ export default function EditProductPage() {
   const [allAddons, setAllAddons] = useState<AddonOption[]>([]);
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [balloonPalettes, setBalloonPalettes] = useState<BalloonPaletteOption[]>([]);
+  const [reusableContent, setReusableContent] = useState<{ included: { id: string; name: string; content: Record<string, unknown> }[]; faqs: { id: string; name: string; content: Record<string, unknown> }[]; delivery: { id: string; name: string; content: Record<string, unknown> }[]; care: { id: string; name: string; content: Record<string, unknown> }[] }>({ included: [], faqs: [], delivery: [], care: [] });
 
   useEffect(() => {
     (async () => {
       const supabase = createClient();
-      const [{ data: prod }, { data: cats }, { data: subs }, { data: products }, { data: addons }, { data: links }, { data: paletteRows }] =
+      const [{ data: prod }, { data: cats }, { data: subs }, { data: products }, { data: addons }, { data: links }, { data: paletteRows }, { data: contentRows }] =
         await Promise.all([
           supabase.from("products").select("*").eq("id", id).single(),
           supabase.from("categories").select("id,name").order("name"),
@@ -35,6 +36,7 @@ export default function EditProductPage() {
           supabase.from("addons").select("id,name,price").order("sort_order"),
           supabase.from("product_addon_links").select("addon_id").eq("product_id", id),
           supabase.from("decoration_content_items").select("id,name,content").eq("kind", "balloon_palette").eq("is_active", true).order("name"),
+          supabase.from("decoration_content_items").select("id,name,kind,content").neq("kind", "balloon_palette").eq("is_active", true).order("name"),
         ]);
       setProduct(prod ?? null);
       setCategories(cats ?? []);
@@ -45,6 +47,8 @@ export default function EditProductPage() {
       setAllAddons(addons ?? []);
       setSelectedAddonIds((links ?? []).map((l) => l.addon_id));
       setBalloonPalettes(((paletteRows ?? []) as unknown as { id: string; name: string; content: { pairs?: BalloonPaletteOption["pairs"] } }[]).map((palette) => ({ id: palette.id, name: palette.name, pairs: palette.content.pairs ?? [] })));
+      const reusableRows = (contentRows ?? []) as unknown as { id: string; name: string; kind: string; content: Record<string, unknown> }[];
+      setReusableContent({ included: reusableRows.filter((item) => item.kind === "included_set"), faqs: reusableRows.filter((item) => item.kind === "faq_set"), delivery: reusableRows.filter((item) => item.kind === "delivery_note"), care: reusableRows.filter((item) => item.kind === "care_note") });
     })();
   }, [id]);
 
@@ -60,6 +64,7 @@ export default function EditProductPage() {
       allAddons={allAddons}
       selectedAddonIds={selectedAddonIds}
       balloonPalettes={balloonPalettes}
+      reusableContent={reusableContent}
     />
   );
 }
