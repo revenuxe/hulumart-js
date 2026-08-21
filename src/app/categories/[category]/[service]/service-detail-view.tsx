@@ -69,14 +69,43 @@ export function ServiceDetailView({
   const detailTabs = useMemo(
     () =>
       [
-        { key: "included" as const, label: "What's included", icon: PackageCheck, visible: service.included.length > 0 || service.notIncluded.length > 0 },
-        { key: "faqs" as const, label: "FAQs", icon: CircleHelp, visible: service.faqs.length > 0 },
-        { key: "delivery" as const, label: "Delivery", icon: Truck, visible: Boolean(service.deliveryInfo) },
-        { key: "care" as const, label: "Care info", icon: HeartHandshake, visible: Boolean(service.careInfo) },
+        {
+          key: "included" as const,
+          label: "What's included",
+          icon: PackageCheck,
+          visible:
+            service.included.length > 0 || service.notIncluded.length > 0,
+        },
+        {
+          key: "faqs" as const,
+          label: "FAQs",
+          icon: CircleHelp,
+          visible: service.faqs.length > 0,
+        },
+        {
+          key: "delivery" as const,
+          label: "Delivery",
+          icon: Truck,
+          visible: Boolean(service.deliveryInfo),
+        },
+        {
+          key: "care" as const,
+          label: "Care info",
+          icon: HeartHandshake,
+          visible: Boolean(service.careInfo),
+        },
       ].filter((tab) => tab.visible),
-    [service.careInfo, service.deliveryInfo, service.faqs.length, service.included.length, service.notIncluded.length],
+    [
+      service.careInfo,
+      service.deliveryInfo,
+      service.faqs.length,
+      service.included.length,
+      service.notIncluded.length,
+    ],
   );
-  const activeDetailTab = detailTabs.some((tab) => tab.key === detailTab) ? detailTab : detailTabs[0]?.key;
+  const activeDetailTab = detailTabs.some((tab) => tab.key === detailTab)
+    ? detailTab
+    : detailTabs[0]?.key;
 
   function toggleAddOn(addOn: ServiceAddOn) {
     setSelectedAddOnIds((ids) =>
@@ -87,8 +116,30 @@ export function ServiceDetailView({
   }
 
   function buildCartItem() {
+    const selectedPalette = service.balloonOptions.find(
+      (option) => option.name === balloonChoice,
+    );
+    const selectedBalloon = balloonChoice
+      ? {
+          kind:
+            balloonChoice === "Custom"
+              ? ("custom" as const)
+              : ("palette" as const),
+          label:
+            balloonChoice === "Custom"
+              ? customBalloonChoice.trim() || "Custom colour request"
+              : balloonChoice,
+          colors: selectedPalette?.colors ?? [],
+        }
+      : undefined;
+    const configurationKey = [
+      selectedBalloon?.kind ?? "none",
+      selectedBalloon?.label ?? "",
+      ...selectedAddOns.map((addOn) => addOn.id).sort(),
+    ].join("|");
+
     return {
-      id: `${service.categorySlug}/${service.slug}/${balloonChoice || "default"}`,
+      id: `${service.categorySlug}/${service.slug}/${encodeURIComponent(configurationKey)}`,
       productId: service.id,
       categorySlug: service.categorySlug,
       categoryName: category.name,
@@ -98,10 +149,8 @@ export function ServiceDetailView({
       unitPrice: service.priceDiscounted,
       originalPrice: service.priceOriginal,
       addOns: selectedAddOns,
-      balloonChoice:
-        balloonChoice === "Custom"
-          ? customBalloonChoice.trim() || "Custom"
-          : balloonChoice || undefined,
+      balloonSelection: selectedBalloon,
+      balloonChoice: selectedBalloon?.label,
     };
   }
 
@@ -327,9 +376,10 @@ export function ServiceDetailView({
               </section>
             )}
 
-            {detailTabs.length > 0 && <section className="mt-6 overflow-hidden rounded-3xl border border-border bg-card shadow-card">
-              <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-border p-3">
-                {detailTabs.map((tab) => {
+            {detailTabs.length > 0 && (
+              <section className="mt-6 overflow-hidden rounded-3xl border border-border bg-card shadow-card">
+                <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-border p-3">
+                  {detailTabs.map((tab) => {
                     const Icon = tab.icon;
                     return (
                       <button
@@ -342,75 +392,76 @@ export function ServiceDetailView({
                       </button>
                     );
                   })}
-              </div>
-              <div className="p-4">
-                {activeDetailTab === "included" && (
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <div>
-                      <p className="mb-3 text-xs font-bold uppercase tracking-wide text-emerald-700">
-                        Included · {service.included.length} items
-                      </p>
-                      <ul className="space-y-2.5">
-                        {service.included.map((item) => (
-                          <li
-                            key={item}
-                            className="flex items-start gap-2.5 text-sm"
-                          >
-                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    {service.notIncluded.length > 0 && (
+                </div>
+                <div className="p-4">
+                  {activeDetailTab === "included" && (
+                    <div className="grid gap-5 sm:grid-cols-2">
                       <div>
-                        <p className="mb-3 text-xs font-bold uppercase tracking-wide text-rose-600">
-                          Not included
+                        <p className="mb-3 text-xs font-bold uppercase tracking-wide text-emerald-700">
+                          Included · {service.included.length} items
                         </p>
                         <ul className="space-y-2.5">
-                          {service.notIncluded.map((item) => (
+                          {service.included.map((item) => (
                             <li
                               key={item}
-                              className="flex items-start gap-2.5 text-sm text-muted-foreground"
+                              className="flex items-start gap-2.5 text-sm"
                             >
-                              <X className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
+                              <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                               {item}
                             </li>
                           ))}
                         </ul>
                       </div>
-                    )}
-                  </div>
-                )}
-                {activeDetailTab === "faqs" && (
-                  <div className="space-y-3">
-                    {service.faqs.map((faq) => (
-                      <details
-                        key={faq.question}
-                        className="rounded-xl border border-border bg-background p-3"
-                      >
-                        <summary className="cursor-pointer text-sm font-bold">
-                          {faq.question}
-                        </summary>
-                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                          {faq.answer}
-                        </p>
-                      </details>
-                    ))}
-                  </div>
-                )}
-                {activeDetailTab === "delivery" && (
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {service.deliveryInfo}
-                  </p>
-                )}
-                {activeDetailTab === "care" && (
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {service.careInfo}
-                  </p>
-                )}
-              </div>
-            </section>}
+                      {service.notIncluded.length > 0 && (
+                        <div>
+                          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-rose-600">
+                            Not included
+                          </p>
+                          <ul className="space-y-2.5">
+                            {service.notIncluded.map((item) => (
+                              <li
+                                key={item}
+                                className="flex items-start gap-2.5 text-sm text-muted-foreground"
+                              >
+                                <X className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {activeDetailTab === "faqs" && (
+                    <div className="space-y-3">
+                      {service.faqs.map((faq) => (
+                        <details
+                          key={faq.question}
+                          className="rounded-xl border border-border bg-background p-3"
+                        >
+                          <summary className="cursor-pointer text-sm font-bold">
+                            {faq.question}
+                          </summary>
+                          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                            {faq.answer}
+                          </p>
+                        </details>
+                      ))}
+                    </div>
+                  )}
+                  {activeDetailTab === "delivery" && (
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {service.deliveryInfo}
+                    </p>
+                  )}
+                  {activeDetailTab === "care" && (
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {service.careInfo}
+                    </p>
+                  )}
+                </div>
+              </section>
+            )}
 
             {/* Add-ons */}
             {service.addOns.length > 0 && (

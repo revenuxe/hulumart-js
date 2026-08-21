@@ -16,7 +16,14 @@ import { StepReview } from "./_components/step-review";
 import { Success } from "./_components/success";
 
 export function BookWizard() {
-  const { draft, update, reset, ready: draftReady, step, setStep } = useDecorBookingDraft();
+  const {
+    draft,
+    update,
+    reset,
+    ready: draftReady,
+    step,
+    setStep,
+  } = useDecorBookingDraft();
   const { items, ready: cartReady, subtotal, clear } = useCart();
   const [done, setDone] = useState(false);
   const [orderCode, setOrderCode] = useState("");
@@ -45,7 +52,12 @@ export function BookWizard() {
   const canContinue = () => {
     if (step === 0) return !!draft.eventDate && !!draft.eventTime;
     if (step === 1)
-      return !!draft.venue.line1 && !!draft.venue.city && !!draft.venue.pincode && !!draft.venue.phone;
+      return (
+        !!draft.venue.line1 &&
+        !!draft.venue.city &&
+        !!draft.venue.pincode &&
+        !!draft.venue.phone
+      );
     return true;
   };
 
@@ -102,7 +114,9 @@ export function BookWizard() {
 
     if (error || !booking) {
       setSubmitting(false);
-      toast.error(error?.message ?? "Could not create your booking. Please try again.");
+      toast.error(
+        error?.message ?? "Could not create your booking. Please try again.",
+      );
       return;
     }
 
@@ -118,7 +132,17 @@ export function BookWizard() {
         original_price: it.originalPrice ?? null,
         quantity: it.quantity,
         addons: it.addOns,
-        customizations: it.balloonChoice ? { balloon_choice: it.balloonChoice } : {},
+        // A checkout snapshot ensures later catalogue edits never change what
+        // the decorator sees for an already placed order.
+        customizations: it.balloonSelection
+          ? {
+              version: 1,
+              balloon: it.balloonSelection,
+              balloon_choice: it.balloonSelection.label,
+            }
+          : it.balloonChoice
+            ? { version: 1, balloon_choice: it.balloonChoice }
+            : {},
       })),
     );
     if (itemsError) {
@@ -138,27 +162,60 @@ export function BookWizard() {
   async function saveVenueAddress() {
     if (draft.venue.addressId) return true;
     const supabase = createClient();
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
     if (userError || !user) {
       setStep(2);
       router.push("/auth?redirect=%2Fbook");
       return false;
     }
     const { data: existing, error: lookupError } = await supabase
-      .from("addresses").select("id").eq("user_id", user.id)
-      .eq("line1", draft.venue.line1).eq("city", draft.venue.city)
-      .eq("pincode", draft.venue.pincode).eq("phone", draft.venue.phone).maybeSingle();
-    if (lookupError) { toast.error("Could not save your address. Please try again."); return false; }
-    if (existing) { update({ venue: { ...draft.venue, addressId: existing.id } }); return true; }
+      .from("addresses")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("line1", draft.venue.line1)
+      .eq("city", draft.venue.city)
+      .eq("pincode", draft.venue.pincode)
+      .eq("phone", draft.venue.phone)
+      .maybeSingle();
+    if (lookupError) {
+      toast.error("Could not save your address. Please try again.");
+      return false;
+    }
+    if (existing) {
+      update({ venue: { ...draft.venue, addressId: existing.id } });
+      return true;
+    }
     const { count, error: countError } = await supabase
-      .from("addresses").select("id", { count: "exact", head: true }).eq("user_id", user.id);
-    if (countError) { toast.error("Could not save your address. Please try again."); return false; }
-    const { data: address, error: saveError } = await supabase.from("addresses").insert({
-      user_id: user.id, label: draft.venue.label || "Home", line1: draft.venue.line1,
-      line2: draft.venue.line2 || null, city: draft.venue.city, pincode: draft.venue.pincode,
-      phone: draft.venue.phone, is_default: (count ?? 0) === 0,
-    }).select("id").single();
-    if (saveError || !address) { toast.error(saveError?.message ?? "Could not save your address. Please try again."); return false; }
+      .from("addresses")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    if (countError) {
+      toast.error("Could not save your address. Please try again.");
+      return false;
+    }
+    const { data: address, error: saveError } = await supabase
+      .from("addresses")
+      .insert({
+        user_id: user.id,
+        label: draft.venue.label || "Home",
+        line1: draft.venue.line1,
+        line2: draft.venue.line2 || null,
+        city: draft.venue.city,
+        pincode: draft.venue.pincode,
+        phone: draft.venue.phone,
+        is_default: (count ?? 0) === 0,
+      })
+      .select("id")
+      .single();
+    if (saveError || !address) {
+      toast.error(
+        saveError?.message ?? "Could not save your address. Please try again.",
+      );
+      return false;
+    }
     update({ venue: { ...draft.venue, addressId: address.id } });
     return true;
   }
@@ -166,7 +223,9 @@ export function BookWizard() {
   async function next() {
     if (step === 0) {
       setCheckingAccount(true);
-      const { data: { user } } = await createClient().auth.getUser();
+      const {
+        data: { user },
+      } = await createClient().auth.getUser();
       setCheckingAccount(false);
       if (!user) {
         // The local booking draft keeps the completed event step through
@@ -226,7 +285,9 @@ export function BookWizard() {
       <main className="mx-auto max-w-md px-5 pt-6 md:max-w-3xl">
         {step === 0 && <StepEvent draft={draft} update={update} />}
         {step === 1 && <StepVenue draft={draft} update={update} />}
-        {step === 2 && <StepReview draft={draft} items={items} subtotal={subtotal} />}
+        {step === 2 && (
+          <StepReview draft={draft} items={items} subtotal={subtotal} />
+        )}
 
         <a
           href={CONTACT.whatsappHref}
@@ -255,7 +316,13 @@ export function BookWizard() {
               disabled={!canContinue() || submitting || checkingAccount}
               className="flex-1 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
             >
-              {submitting ? "Booking…" : checkingAccount ? "Checking account…" : step === lastStep ? "Confirm Booking" : "Continue"}
+              {submitting
+                ? "Booking…"
+                : checkingAccount
+                  ? "Checking account…"
+                  : step === lastStep
+                    ? "Confirm Booking"
+                    : "Continue"}
             </button>
           </div>
         </div>

@@ -8,9 +8,13 @@ import { createClient } from "@/lib/supabase/server";
 import { STATUS_META, STATUS_ORDER, type BookingStatus } from "../status-meta";
 import { CancelBookingButton } from "./cancel-booking-button";
 import type { Json } from "@/lib/supabase/types";
+import { getBookingCustomizationDetails } from "@/lib/booking-customizations";
 
 // Signed-in, per-user booking record — no organic value.
-export const metadata: Metadata = { title: "Booking details", robots: { index: false, follow: true } };
+export const metadata: Metadata = {
+  title: "Booking details",
+  robots: { index: false, follow: true },
+};
 
 type AddOnSnapshot = { id: string; name: string; price: number };
 
@@ -19,7 +23,11 @@ function parseAddOns(json: Json): AddOnSnapshot[] {
   return json as unknown as AddOnSnapshot[];
 }
 
-export default async function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BookingDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const supabase = await createClient();
   const {
@@ -27,20 +35,32 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
   } = await supabase.auth.getUser();
   if (!user) notFound();
 
-  const [{ data: booking }, { data: items }, { data: events }] = await Promise.all([
-    supabase.from("bookings").select("*").eq("id", id).maybeSingle(),
-    supabase.from("booking_items").select("*").eq("booking_id", id).order("created_at"),
-    supabase.from("booking_status_events").select("status, created_at").eq("booking_id", id).order("created_at"),
-  ]);
+  const [{ data: booking }, { data: items }, { data: events }] =
+    await Promise.all([
+      supabase.from("bookings").select("*").eq("id", id).maybeSingle(),
+      supabase
+        .from("booking_items")
+        .select("*")
+        .eq("booking_id", id)
+        .order("created_at"),
+      supabase
+        .from("booking_status_events")
+        .select("status, created_at")
+        .eq("booking_id", id)
+        .order("created_at"),
+    ]);
 
   if (!booking) notFound();
 
   const status = STATUS_META[booking.status];
   const reachedAt = new Map<BookingStatus, string>();
-  for (const e of events ?? []) if (!reachedAt.has(e.status)) reachedAt.set(e.status, e.created_at);
+  for (const e of events ?? [])
+    if (!reachedAt.has(e.status)) reachedAt.set(e.status, e.created_at);
 
   const isCancelled = booking.status === "cancelled";
-  const currentIndex = STATUS_ORDER.indexOf(booking.status as (typeof STATUS_ORDER)[number]);
+  const currentIndex = STATUS_ORDER.indexOf(
+    booking.status as (typeof STATUS_ORDER)[number],
+  );
 
   return (
     <div className="min-h-dvh bg-background pb-16">
@@ -55,12 +75,22 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-accent">Booking</p>
-            <h1 className="mt-1 font-display text-3xl">#{booking.order_code}</h1>
+            <p className="text-xs font-bold uppercase tracking-widest text-accent">
+              Booking
+            </p>
+            <h1 className="mt-1 font-display text-3xl">
+              #{booking.order_code}
+            </h1>
           </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-bold ${status.badgeClass}`}>{status.label}</span>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-bold ${status.badgeClass}`}
+          >
+            {status.label}
+          </span>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">{status.description}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {status.description}
+        </p>
 
         <a
           href={`/bookings/${booking.id}/estimate`}
@@ -77,7 +107,12 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
             <Timeline
               steps={[
                 { label: "Pending", done: true, at: reachedAt.get("pending") },
-                { label: "Cancelled", done: true, at: reachedAt.get("cancelled"), destructive: true },
+                {
+                  label: "Cancelled",
+                  done: true,
+                  at: reachedAt.get("cancelled"),
+                  destructive: true,
+                },
               ]}
             />
           ) : (
@@ -97,10 +132,21 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           <div className="space-y-3">
             {(items ?? []).map((it) => {
               const addOns = parseAddOns(it.addons);
+              const balloon = getBookingCustomizationDetails(
+                it.customizations,
+              ).balloon;
               return (
                 <div key={it.id} className="flex gap-3">
                   <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-muted">
-                    {it.image && <Image src={it.image} alt="" fill sizes="56px" className="object-cover" />}
+                    {it.image && (
+                      <Image
+                        src={it.image}
+                        alt=""
+                        fill
+                        sizes="56px"
+                        className="object-cover"
+                      />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">
@@ -111,11 +157,20 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                         {addOns.map((a) => a.name).join(", ")}
                       </p>
                     )}
+                    {balloon && (
+                      <p className="mt-1 text-xs font-semibold text-primary">
+                        {balloon.kind === "custom"
+                          ? "Custom balloons"
+                          : "Balloon palette"}
+                        : {balloon.label}
+                      </p>
+                    )}
                   </div>
                   <p className="shrink-0 text-sm font-bold">
                     ₹
                     {(
-                      (Number(it.unit_price) + addOns.reduce((s, a) => s + a.price, 0)) *
+                      (Number(it.unit_price) +
+                        addOns.reduce((s, a) => s + a.price, 0)) *
                       it.quantity
                     ).toLocaleString("en-IN")}
                   </p>
@@ -136,7 +191,9 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           <h2 className="mb-3 text-sm font-bold">Event details</h2>
           <div className="space-y-3 text-sm">
             <div className="flex items-start justify-between gap-4">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Event</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Event
+              </span>
               <span className="text-right font-semibold">
                 {new Date(booking.event_date).toLocaleDateString(undefined, {
                   weekday: "short",
@@ -149,12 +206,16 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
             <div className="flex items-start gap-2.5 border-t border-border/60 pt-3">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <p>
-                {booking.venue_name && <span className="font-semibold">{booking.venue_name}, </span>}
+                {booking.venue_name && (
+                  <span className="font-semibold">{booking.venue_name}, </span>
+                )}
                 {booking.venue_line1}
-                {booking.venue_line2 ? `, ${booking.venue_line2}` : ""}, {booking.venue_city} —{" "}
-                {booking.venue_pincode}
+                {booking.venue_line2 ? `, ${booking.venue_line2}` : ""},{" "}
+                {booking.venue_city} — {booking.venue_pincode}
                 <br />
-                <span className="text-muted-foreground">{booking.venue_phone}</span>
+                <span className="text-muted-foreground">
+                  {booking.venue_phone}
+                </span>
               </p>
             </div>
             {booking.notes && (
@@ -201,7 +262,9 @@ function Timeline({
               {s.done && <Check className="h-3.5 w-3.5" />}
             </span>
             {i < steps.length - 1 && (
-              <span className={`h-8 w-0.5 ${s.done ? "bg-primary/40" : "bg-border"}`} />
+              <span
+                className={`h-8 w-0.5 ${s.done ? "bg-primary/40" : "bg-border"}`}
+              />
             )}
           </div>
           <div className={`pb-8 ${!s.done && "opacity-50"}`}>

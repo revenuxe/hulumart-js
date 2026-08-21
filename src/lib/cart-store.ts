@@ -15,6 +15,13 @@ export type CartItem = {
   originalPrice?: number;
   quantity: number;
   addOns: ServiceAddOn[];
+  /** A fulfilment snapshot of the palette selection made on the product page. */
+  balloonSelection?: {
+    kind: "palette" | "custom";
+    label: string;
+    colors: string[];
+  };
+  /** @deprecated Kept so carts created before the structured snapshot still work. */
   balloonChoice?: string;
 };
 
@@ -63,13 +70,17 @@ export function useCart() {
     notify();
   };
 
-  const addItem = (item: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+  const addItem = (
+    item: Omit<CartItem, "quantity"> & { quantity?: number },
+  ) => {
     const current = readCart();
     const existing = current.find((it) => it.id === item.id);
     if (existing) {
       commit(
         current.map((it) =>
-          it.id === item.id ? { ...it, quantity: it.quantity + (item.quantity ?? 1) } : it,
+          it.id === item.id
+            ? { ...it, quantity: it.quantity + (item.quantity ?? 1) }
+            : it,
         ),
       );
     } else {
@@ -77,7 +88,8 @@ export function useCart() {
     }
   };
 
-  const removeItem = (id: string) => commit(readCart().filter((it) => it.id !== id));
+  const removeItem = (id: string) =>
+    commit(readCart().filter((it) => it.id !== id));
 
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity < 1) return removeItem(id);
@@ -89,7 +101,12 @@ export function useCart() {
       readCart().map((it) => {
         if (it.id !== id) return it;
         const has = it.addOns.some((a) => a.id === addOn.id);
-        return { ...it, addOns: has ? it.addOns.filter((a) => a.id !== addOn.id) : [...it.addOns, addOn] };
+        return {
+          ...it,
+          addOns: has
+            ? it.addOns.filter((a) => a.id !== addOn.id)
+            : [...it.addOns, addOn],
+        };
       }),
     );
   };
@@ -102,5 +119,15 @@ export function useCart() {
   }, 0);
   const itemCount = items.reduce((n, it) => n + it.quantity, 0);
 
-  return { items, ready, addItem, removeItem, updateQuantity, toggleAddOn, clear, subtotal, itemCount };
+  return {
+    items,
+    ready,
+    addItem,
+    removeItem,
+    updateQuantity,
+    toggleAddOn,
+    clear,
+    subtotal,
+    itemCount,
+  };
 }
