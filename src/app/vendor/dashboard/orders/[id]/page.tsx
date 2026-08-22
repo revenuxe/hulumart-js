@@ -10,7 +10,7 @@ import type { Database, Json } from "@/lib/supabase/types";
 import { getBookingCustomizationDetails } from "@/lib/booking-customizations";
 
 export const metadata: Metadata = {
-  title: "Order details | Baraabar Vendor Portal",
+  title: "Order details | Zapiboo Vendor Portal",
   robots: { index: false, follow: false },
 };
 

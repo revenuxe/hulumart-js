@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { QuoteBuilder, type QuoteLineItem } from "./quote-builder";
 import type { Json } from "@/lib/supabase/types";
 
-export const metadata: Metadata = { title: "Build quote | Baraabar Vendor Portal", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Build quote | Zapiboo Vendor Portal", robots: { index: false, follow: false } };
 
 type AddOnSnapshot = { id: string; name: string; price: number };
 

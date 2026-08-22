@@ -30,6 +30,7 @@ export function BookWizard() {
   const [bookingId, setBookingId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [checkingAccount, setCheckingAccount] = useState(false);
+  const [redirectingToSignIn, setRedirectingToSignIn] = useState(false);
   const router = useRouter();
 
   const ready = draftReady && cartReady;
@@ -46,6 +47,15 @@ export function BookWizard() {
 
   if (!ready) return null;
   if (!done && items.length === 0) return null;
+
+  function redirectToSignIn(nextStep: number) {
+    // Persist the step for the return journey, then replace the protected
+    // wizard UI immediately. This prevents Venue/Review flashing briefly
+    // while Next finishes the client-side navigation to /auth.
+    setStep(nextStep);
+    setRedirectingToSignIn(true);
+    router.push("/auth?redirect=%2Fbook");
+  }
 
   const steps = ["Event", "Venue", "Review"] as const;
   const lastStep = steps.length - 1;
@@ -70,7 +80,7 @@ export function BookWizard() {
     if (!user) {
       // Draft and cart already persist to localStorage, so the wizard picks
       // up where it left off once the user is back from signing in.
-      router.push("/auth?redirect=%2Fbook");
+      redirectToSignIn(step);
       return;
     }
 
@@ -167,8 +177,7 @@ export function BookWizard() {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      setStep(2);
-      router.push("/auth?redirect=%2Fbook");
+      redirectToSignIn(2);
       return false;
     }
     const { data: existing, error: lookupError } = await supabase
@@ -231,8 +240,7 @@ export function BookWizard() {
         // The local booking draft keeps the completed event step through
         // sign-in — advance the step before leaving so the wizard resumes
         // on Venue (not back at Event) once the user returns from /auth.
-        setStep(1);
-        router.push("/auth?redirect=%2Fbook");
+        redirectToSignIn(1);
         return;
       }
       setStep(1);
@@ -250,6 +258,7 @@ export function BookWizard() {
   };
 
   if (done) return <Success orderId={orderCode} bookingId={bookingId} />;
+  if (redirectingToSignIn) return <div className="grid min-h-dvh place-items-center bg-background p-6 text-center text-sm font-semibold text-muted-foreground">Taking you to sign in…</div>;
 
   return (
     <div className="min-h-dvh bg-background pb-32">

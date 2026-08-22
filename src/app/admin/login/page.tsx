@@ -4,8 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { AdminLoginForm } from "./admin-login-form";
 
 export const metadata: Metadata = {
-  title: "Admin login | Decor Eventz",
-  description: "Secure sign-in for Decor Eventz administrators.",
+  title: "Admin login | Zapiboo",
+  description: "Secure sign-in for Zapiboo administrators.",
   robots: { index: false, follow: false },
 };
 

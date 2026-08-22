@@ -69,7 +69,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   return new NextResponse(Uint8Array.from(buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="Decor-Eventz-Estimate-${booking.order_code}.pdf"`,
+      "Content-Disposition": `attachment; filename="Zapiboo-Estimate-${booking.order_code}.pdf"`,
       "Cache-Control": "private, no-store",
     },
   });

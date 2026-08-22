@@ -101,7 +101,7 @@ export function AdminLoginForm() {
         </div>
 
         <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          Decor Eventz · Admin Console
+          Zapiboo · Admin Console
         </p>
       </div>
     </div>

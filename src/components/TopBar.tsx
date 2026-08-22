@@ -21,7 +21,6 @@ export function TopBar() {
   const [mobileMenu, setMobileMenu] = useState<string | null>(null);
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [accountName, setAccountName] = useState<string | null>(null);
   const [supabase] = useState(() => createClient());
   const closeTimer = useRef<number | null>(null);
   const { itemCount } = useCart();
@@ -35,21 +34,13 @@ export function TopBar() {
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!active) return;
-      setUser(user);
-      if (!user) { setAccountName(null); return; }
-      const fallback = typeof user.user_metadata.full_name === "string" ? user.user_metadata.full_name : user.email ?? null;
-      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
-      if (active) setAccountName(profile?.full_name?.trim() || fallback);
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (active) setUser(user);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setAccountName(session?.user ? (typeof session.user.user_metadata.full_name === "string" ? session.user.user_metadata.full_name : session.user.email ?? null) : null);
-    });
+    } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
 
     return () => {
       active = false;
@@ -67,7 +58,7 @@ export function TopBar() {
         <div className="ml-auto flex items-center gap-2 md:gap-5">
           <button onClick={() => setSearchOpen(true)} aria-label="Search decorations" className="grid h-10 w-10 place-items-center rounded-full text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"><Search className="h-5 w-5" /></button>
           <Link href="/contact" className="hidden items-center gap-2 text-sm font-medium text-primary md:flex"><Headphones className="h-5 w-5" /> Support</Link>
-          <Link href={user ? "/profile" : "/auth?redirect=%2Fprofile"} className="hidden max-w-48 items-center gap-2 text-sm font-semibold text-primary md:flex"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#edf7f8] text-accent"><UserRound className="h-4 w-4" /></span><span className="truncate">{user ? accountName ?? "My account" : "Sign in"}</span></Link>
+          <Link href={user ? "/profile" : "/auth?redirect=%2Fprofile"} className="hidden items-center gap-2 text-sm font-semibold text-primary md:flex"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#edf7f8] text-accent"><UserRound className="h-4 w-4" /></span>{user ? "My account" : "Sign in"}</Link>
           <Link href="/cart" aria-label="Cart" className="relative grid h-10 w-10 place-items-center rounded-full text-primary"><ShoppingBag className="h-5 w-5" />{itemCount > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">{itemCount}</span>}</Link>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { VendorShell } from "./vendor-shell";
 
 export const metadata: Metadata = {
-  title: "Vendor dashboard | Decor Eventz",
+  title: "Vendor dashboard | Zapiboo",
   robots: { index: false, follow: false },
 };
 

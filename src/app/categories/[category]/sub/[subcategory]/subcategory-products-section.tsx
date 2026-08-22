@@ -19,7 +19,7 @@ export function SubcategoryProductsSection({ services }: { services: DecorServic
       {visibleServices.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
           {visibleServices.map((s) => (
-            <ServiceCard key={s.id} service={s} />
+            <ServiceCard key={s.id} service={s} compact />
           ))}
         </div>
       ) : (

@@ -31,7 +31,7 @@ export function ServiceGridSearch({
         {visible.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
             {visible.map((s) => (
-              <ServiceCard key={s.id} service={s} badge={cardBadge} />
+              <ServiceCard key={s.id} service={s} badge={cardBadge} compact />
             ))}
           </div>
         ) : (

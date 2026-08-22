@@ -28,7 +28,7 @@ export default async function BookingsPage() {
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-gradient-brand text-primary-foreground shadow-glow">
             <LogIn className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-3xl">Sign in to Baraabar</h1>
+          <h1 className="mt-5 font-display text-3xl">Sign in to Zapiboo</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in to view and track your event decoration bookings.
           </p>
