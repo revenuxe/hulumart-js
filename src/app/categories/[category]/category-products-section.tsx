@@ -75,4 +75,4 @@ export function CategoryProductsSection({
   );
 }
 
-function FilterChip({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon?: ReactNode; children: ReactNode }) { return <button type="button" onClick={onClick} className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition ${active ? "border-amber-400 bg-amber-50 text-amber-700" : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-primary"}`}>{icon}{children}</button>; }
+function FilterChip({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon?: ReactNode; children: ReactNode }) { return <button type="button" aria-pressed={active} onClick={onClick} className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active ? "border-brand-purple/35 bg-gradient-brand-soft text-primary shadow-sm" : "border-border bg-card text-muted-foreground hover:border-accent/40 hover:bg-[#edf7f8] hover:text-accent"}`}>{icon}{children}</button>; }
