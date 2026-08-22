@@ -14,6 +14,7 @@ import {
   getFeaturedServices,
   getServicesByCategory,
   getCategoryBySlug,
+  getHomepageHeroSlides,
 } from "@/data";
 
 // Below-the-fold and non-critical for first paint — split into its own
@@ -21,11 +22,12 @@ import {
 const Reviews = dynamic(() => import("@/components/Reviews").then((m) => m.Reviews));
 
 export default async function Home() {
-  const [categories, trendingServices, featuredServices, weddingCategory] = await Promise.all([
+  const [categories, trendingServices, featuredServices, weddingCategory, heroSlides] = await Promise.all([
     getCategories(),
     getTrendingServices(8),
     getFeaturedServices(8),
     getCategoryBySlug("wedding"),
+    getHomepageHeroSlides(),
   ]);
   const weddingServices = weddingCategory ? await getServicesByCategory("wedding") : [];
 
@@ -33,7 +35,7 @@ export default async function Home() {
     <div className="min-h-dvh bg-background pb-24 md:pb-0">
       <TopBar />
       <main>
-        <Hero />
+        <Hero slides={heroSlides} />
         <FeaturedCollections
           services={trendingServices}
           eyebrow="Trending now"

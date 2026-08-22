@@ -14,23 +14,33 @@ import {
   CalendarCheck,
   Users as UsersIcon,
   Store,
+  House,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
   { href: "/admin/dashboard/bookings", label: "Bookings", icon: CalendarCheck, exact: false },
-  { href: "/admin/dashboard/categories", label: "Categories", icon: Layers, exact: false },
-  { href: "/admin/dashboard/subcategories", label: "Subcategories", icon: FolderTree, exact: false },
-  { href: "/admin/dashboard/products", label: "Products", icon: PartyPopper, exact: false },
-  { href: "/admin/dashboard/addons", label: "Add-ons", icon: Gift, exact: false },
-  { href: "/admin/dashboard/decorations", label: "Decorations", icon: PartyPopper, exact: false },
+  { href: "/admin/dashboard/categories", label: "Listings", icon: Layers, exact: false },
+  { href: "/admin/dashboard/homepage", label: "Homepage", icon: House, exact: false },
   { href: "/admin/dashboard/vendors", label: "Vendors", icon: Store, exact: false },
   { href: "/admin/dashboard/users", label: "Users", icon: UsersIcon, exact: false },
 ];
 
+const LISTING_TABS = [
+  { href: "/admin/dashboard/categories", label: "Categories", icon: Layers },
+  { href: "/admin/dashboard/subcategories", label: "Subcategories", icon: FolderTree },
+  { href: "/admin/dashboard/products", label: "Products", icon: PartyPopper },
+  { href: "/admin/dashboard/addons", label: "Add-ons", icon: Gift },
+  { href: "/admin/dashboard/decorations", label: "Decorations", icon: PartyPopper },
+];
+
+const HOMEPAGE_TABS = [{ href: "/admin/dashboard/homepage", label: "Hero carousel", icon: House }];
+
 export function AdminShell({ email, children }: { email: string; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const activeListing = LISTING_TABS.some((tab) => pathname.startsWith(tab.href));
+  const activeHomepage = pathname.startsWith("/admin/dashboard/homepage");
 
   async function signOut() {
     const supabase = createClient();
@@ -67,7 +77,11 @@ export function AdminShell({ email, children }: { email: string; children: React
         <nav className="no-scrollbar mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 pb-2">
           {NAV.map((n) => {
             const Icon = n.icon;
-            const active = n.exact ? pathname === n.href : pathname.startsWith(n.href);
+            const active = n.label === "Listings"
+              ? activeListing
+              : n.label === "Homepage"
+                ? activeHomepage
+                : n.exact ? pathname === n.href : pathname.startsWith(n.href);
             return (
               <Link
                 key={n.href}
@@ -84,6 +98,17 @@ export function AdminShell({ email, children }: { email: string; children: React
             );
           })}
         </nav>
+        {(activeListing || activeHomepage) && (
+          <nav aria-label={activeListing ? "Listing sections" : "Homepage sections"} className="border-t border-border/70 bg-muted/30">
+            <div className="no-scrollbar mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2">
+              {(activeListing ? LISTING_TABS : HOMEPAGE_TABS).map((tab) => {
+                const active = pathname.startsWith(tab.href);
+                const Icon = tab.icon;
+                return <Link key={tab.href} href={tab.href} className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${active ? "bg-card text-primary shadow-sm ring-1 ring-border" : "text-muted-foreground hover:bg-card/70 hover:text-primary"}`}><Icon className="h-3.5 w-3.5" />{tab.label}</Link>;
+              })}
+            </div>
+          </nav>
+        )}
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>

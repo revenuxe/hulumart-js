@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { ChevronDown, Headphones, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import logo from "@/assets/zapiboo-logo-cropped.webp";
 import { SearchOverlay } from "@/components/SearchOverlay";
@@ -17,17 +16,16 @@ const NAV_ITEMS = [
 ];
 
 export function TopBar() {
-  const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenu, setMobileMenu] = useState<string | null>(null);
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [accountName, setAccountName] = useState<string | null>(null);
   const [supabase] = useState(() => createClient());
   const closeTimer = useRef<number | null>(null);
   const { itemCount } = useCart();
   const { subcategories, products } = useMegaMenuData(true);
-  const home = pathname === "/";
   const keepMenuOpen = (slug: string) => { if (closeTimer.current) window.clearTimeout(closeTimer.current); setOpenMenu(slug); };
   const scheduleMenuClose = () => { closeTimer.current = window.setTimeout(() => setOpenMenu(null), 220); };
   const mobileItem = NAV_ITEMS.find((item) => item.slug === mobileMenu);
@@ -37,13 +35,21 @@ export function TopBar() {
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (active) setUser(user);
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!active) return;
+      setUser(user);
+      if (!user) { setAccountName(null); return; }
+      const fallback = typeof user.user_metadata.full_name === "string" ? user.user_metadata.full_name : user.email ?? null;
+      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+      if (active) setAccountName(profile?.full_name?.trim() || fallback);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setAccountName(session?.user ? (typeof session.user.user_metadata.full_name === "string" ? session.user.user_metadata.full_name : session.user.email ?? null) : null);
+    });
 
     return () => {
       active = false;
@@ -52,7 +58,7 @@ export function TopBar() {
   }, [supabase]);
 
   return (
-    <header className={`${home ? "sticky md:fixed" : "sticky"} inset-x-0 top-0 z-40 border-b border-[#e8edf3] bg-white shadow-sm`}>
+    <header className="sticky inset-x-0 top-0 z-40 border-b border-[#e8edf3] bg-white shadow-sm">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-4 px-4 md:px-8">
         <Link href="/" aria-label="Zapiboo home" className="flex h-16 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"><Image src={logo} alt="Zapiboo — Play, Laugh, Discover" priority width={109} height={64} className="h-16 w-[109px] object-contain" /></Link>
         <button onClick={() => setSearchOpen(true)} className="hidden h-11 max-w-[480px] flex-1 items-center gap-3 rounded-xl border border-[#dfe6ee] bg-[#f8fafc] px-4 text-left text-sm text-muted-foreground md:flex">
@@ -61,7 +67,7 @@ export function TopBar() {
         <div className="ml-auto flex items-center gap-2 md:gap-5">
           <button onClick={() => setSearchOpen(true)} aria-label="Search decorations" className="grid h-10 w-10 place-items-center rounded-full text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"><Search className="h-5 w-5" /></button>
           <Link href="/contact" className="hidden items-center gap-2 text-sm font-medium text-primary md:flex"><Headphones className="h-5 w-5" /> Support</Link>
-          <Link href={user ? "/profile" : "/auth?redirect=%2Fprofile"} className="hidden items-center gap-2 text-sm font-semibold text-primary md:flex"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#edf7f8] text-accent"><UserRound className="h-4 w-4" /></span> {user ? "My account" : "Sign in"}</Link>
+          <Link href={user ? "/profile" : "/auth?redirect=%2Fprofile"} className="hidden max-w-48 items-center gap-2 text-sm font-semibold text-primary md:flex"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#edf7f8] text-accent"><UserRound className="h-4 w-4" /></span><span className="truncate">{user ? accountName ?? "My account" : "Sign in"}</span></Link>
           <Link href="/cart" aria-label="Cart" className="relative grid h-10 w-10 place-items-center rounded-full text-primary"><ShoppingBag className="h-5 w-5" />{itemCount > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">{itemCount}</span>}</Link>
         </div>
       </div>

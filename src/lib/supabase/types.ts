@@ -370,6 +370,12 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_hero_slides: {
+        Row: { action_label: string; action_url: string; created_at: string; desktop_image_url: string; id: string; is_active: boolean; kicker: string; mobile_image_url: string | null; sort_order: number; subtitle: string; title: string; updated_at: string }
+        Insert: { action_label?: string; action_url?: string; created_at?: string; desktop_image_url: string; id?: string; is_active?: boolean; kicker?: string; mobile_image_url?: string | null; sort_order?: number; subtitle?: string; title: string; updated_at?: string }
+        Update: { action_label?: string; action_url?: string; created_at?: string; desktop_image_url?: string; id?: string; is_active?: boolean; kicker?: string; mobile_image_url?: string | null; sort_order?: number; subtitle?: string; title?: string; updated_at?: string }
+        Relationships: []
+      }
       product_addon_links: {
         Row: {
           addon_id: string

@@ -15,5 +15,6 @@ export async function POST() {
   // Product and palette updates must take effect on the next public request,
   // rather than waiting for the catalog's normal timed revalidation.
   revalidateTag("catalog", { expire: 0 });
+  revalidateTag("homepage-hero", { expire: 0 });
   return NextResponse.json({ revalidated: true });
 }
