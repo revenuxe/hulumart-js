@@ -1,12 +1,11 @@
 import type { NextConfig } from "next";
+import { s3PublicHostname } from "./src/lib/s3-public-url";
 
 // AWS_S3_PUBLIC_URL (a CloudFront/custom domain in front of the bucket, see
 // src/lib/s3-url.ts) is optional — only allowlist its hostname when set, so
 // a bare bucket setup doesn't need a placeholder pattern for a domain that
 // doesn't exist.
-const s3PublicHostname = process.env.AWS_S3_PUBLIC_URL
-  ? new URL(process.env.AWS_S3_PUBLIC_URL).hostname
-  : null;
+const s3CdnHostname = s3PublicHostname();
 
 const nextConfig: NextConfig = {
   images: {
@@ -22,8 +21,8 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.s3.*.amazonaws.com",
       },
-      ...(s3PublicHostname
-        ? [{ protocol: "https" as const, hostname: s3PublicHostname }]
+      ...(s3CdnHostname
+        ? [{ protocol: "https" as const, hostname: s3CdnHostname }]
         : []),
       // Stock photography for the decor catalog mock data (see src/data/).
       {
