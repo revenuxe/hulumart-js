@@ -12,7 +12,12 @@ import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 const NAV_ITEMS = [
-  { label: "Birthday", slug: "birthday" }, { label: "Anniversary", slug: "anniversary" }, { label: "Baby Shower", slug: "baby-shower" }, { label: "Kids Special", slug: "kids" }, { label: "Wedding Decor", slug: "wedding" }, { label: "Corporate", slug: "corporate" }, { label: "Kids Activities", slug: "kids-activities" },
+  { label: "Smartphones", slug: "smartphones" },
+  { label: "Laptops", slug: "laptops" },
+  { label: "Tablets", slug: "tablets" },
+  { label: "Audio", slug: "audio" },
+  { label: "Wearables", slug: "wearables" },
+  { label: "Gaming", slug: "gaming" },
 ];
 
 export function TopBar() {

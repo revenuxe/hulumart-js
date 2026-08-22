@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ServiceAddOn } from "@/data/types";
 
 export type CartItem = {
-  id: string; // `${categorySlug}/${serviceSlug}`
+  id: string;
   productId: string;
   categorySlug: string;
   categoryName: string;
@@ -14,120 +13,24 @@ export type CartItem = {
   unitPrice: number;
   originalPrice?: number;
   quantity: number;
-  addOns: ServiceAddOn[];
-  /** A fulfilment snapshot of the palette selection made on the product page. */
-  balloonSelection?: {
-    kind: "palette" | "custom";
-    label: string;
-    colors: string[];
-  };
-  /** @deprecated Kept so carts created before the structured snapshot still work. */
-  balloonChoice?: string;
 };
 
-const KEY = "baraabar_cart_v1";
-
-function readCart(): CartItem[] {
-  try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as CartItem[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeCart(items: CartItem[]) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(items));
-  } catch {}
-}
-
-// Cross-tab/cross-component sync — several components (TopBar badge,
-// BottomNav badge, cart page) all read this hook independently, so a
-// change in one must be reflected in the others without a page reload.
+const KEY = "zapiboo_cart_v1";
 const listeners = new Set<() => void>();
-function notify() {
-  listeners.forEach((l) => l());
-}
+const readCart = (): CartItem[] => { try { const value = localStorage.getItem(KEY); return value ? JSON.parse(value) as CartItem[] : []; } catch { return []; } };
+const writeCart = (items: CartItem[]) => { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch {} };
+const notify = () => listeners.forEach((listener) => listener());
 
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setItems(readCart());
-    setReady(true);
-    const onChange = () => setItems(readCart());
-    listeners.add(onChange);
-    return () => {
-      listeners.delete(onChange);
-    };
-  }, []);
-
-  const commit = (next: CartItem[]) => {
-    setItems(next);
-    writeCart(next);
-    notify();
+  useEffect(() => { setItems(readCart()); setReady(true); const sync = () => setItems(readCart()); listeners.add(sync); return () => { listeners.delete(sync); }; }, []);
+  const commit = (next: CartItem[]) => { setItems(next); writeCart(next); notify(); };
+  const addItem = (item: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+    const current = readCart(); const existing = current.find((currentItem) => currentItem.id === item.id);
+    commit(existing ? current.map((currentItem) => currentItem.id === item.id ? { ...currentItem, quantity: currentItem.quantity + (item.quantity ?? 1) } : currentItem) : [...current, { ...item, quantity: item.quantity ?? 1 }]);
   };
-
-  const addItem = (
-    item: Omit<CartItem, "quantity"> & { quantity?: number },
-  ) => {
-    const current = readCart();
-    const existing = current.find((it) => it.id === item.id);
-    if (existing) {
-      commit(
-        current.map((it) =>
-          it.id === item.id
-            ? { ...it, quantity: it.quantity + (item.quantity ?? 1) }
-            : it,
-        ),
-      );
-    } else {
-      commit([...current, { ...item, quantity: item.quantity ?? 1 }]);
-    }
-  };
-
-  const removeItem = (id: string) =>
-    commit(readCart().filter((it) => it.id !== id));
-
-  const updateQuantity = (id: string, quantity: number) => {
-    if (quantity < 1) return removeItem(id);
-    commit(readCart().map((it) => (it.id === id ? { ...it, quantity } : it)));
-  };
-
-  const toggleAddOn = (id: string, addOn: ServiceAddOn) => {
-    commit(
-      readCart().map((it) => {
-        if (it.id !== id) return it;
-        const has = it.addOns.some((a) => a.id === addOn.id);
-        return {
-          ...it,
-          addOns: has
-            ? it.addOns.filter((a) => a.id !== addOn.id)
-            : [...it.addOns, addOn],
-        };
-      }),
-    );
-  };
-
-  const clear = () => commit([]);
-
-  const subtotal = items.reduce((sum, it) => {
-    const addOnsTotal = it.addOns.reduce((s, a) => s + a.price, 0);
-    return sum + (it.unitPrice + addOnsTotal) * it.quantity;
-  }, 0);
-  const itemCount = items.reduce((n, it) => n + it.quantity, 0);
-
-  return {
-    items,
-    ready,
-    addItem,
-    removeItem,
-    updateQuantity,
-    toggleAddOn,
-    clear,
-    subtotal,
-    itemCount,
-  };
+  const removeItem = (id: string) => commit(readCart().filter((item) => item.id !== id));
+  const updateQuantity = (id: string, quantity: number) => quantity < 1 ? removeItem(id) : commit(readCart().map((item) => item.id === id ? { ...item, quantity } : item));
+  return { items, ready, addItem, removeItem, updateQuantity, clear: () => commit([]), subtotal: items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0), itemCount: items.reduce((sum, item) => sum + item.quantity, 0) };
 }

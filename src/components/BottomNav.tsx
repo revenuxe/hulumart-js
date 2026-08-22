@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, CalendarCheck, User } from "lucide-react";
+import { Home, LayoutGrid, ShoppingBag, User } from "lucide-react";
 
 const ITEMS = [
   { to: "/", label: "Home", Icon: Home, exact: true },
   { to: "/categories", label: "Categories", Icon: LayoutGrid, exact: false },
-  { to: "/bookings", label: "My Bookings", Icon: CalendarCheck, exact: false },
+  { to: "/cart", label: "Cart", Icon: ShoppingBag, exact: false },
   { to: "/profile", label: "Profile", Icon: User, exact: false },
 ] as const;
 

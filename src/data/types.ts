@@ -1,21 +1,15 @@
-// Shapes deliberately parallel the Supabase `categories`/`subcategories`/
-// `products` tables (see src/lib/supabase/types.ts) — src/data/index.ts maps
-// DB rows into these exact shapes, so no page/component beyond it needs to
-// know the storefront is DB-backed.
-
-export type DecorCategory = {
+export type CatalogCategory = {
   id: string;
   slug: string;
   name: string;
   tagline: string;
-  /** Tailwind gradient-overlay classes, same role as categories.accent */
   accent: string;
   heroImage: string;
   sortOrder: number;
   updatedAt: string;
 };
 
-export type DecorSubcategory = {
+export type CatalogSubcategory = {
   id: string;
   slug: string;
   categorySlug: string;
@@ -26,17 +20,9 @@ export type DecorSubcategory = {
   updatedAt: string;
 };
 
-export type ServiceAddOn = {
-  id: string;
-  name: string;
-  price: number;
-  description?: string;
-};
-
-export type BalloonOption = { name: string; colors: string[] };
 export type ProductFaq = { question: string; answer: string };
 
-export type DecorService = {
+export type CatalogProduct = {
   id: string;
   slug: string;
   categorySlug: string;
@@ -44,7 +30,19 @@ export type DecorService = {
   name: string;
   tagline: string;
   description: string;
-  /** Gallery images, [0] is the cover image. */
+  brand?: string;
+  model?: string;
+  conditionGrade?: "like_new" | "excellent" | "good" | "fair";
+  conditionSummary?: string;
+  approximateAgeMonths?: number;
+  usageSummary?: string;
+  warrantyStatus?: "none" | "seller" | "manufacturer" | "extended";
+  warrantyProvider?: string;
+  warrantyExpiresAt?: string;
+  warrantyCoverage?: string;
+  warrantyTransferable?: boolean;
+  stockQuantity?: number;
+  reservedQuantity?: number;
   images: string[];
   priceOriginal: number;
   priceDiscounted: number;
@@ -53,32 +51,23 @@ export type DecorService = {
   reviewCount: number;
   included: string[];
   notIncluded: string[];
-  balloonOptions: BalloonOption[];
   faqs: ProductFaq[];
   deliveryInfo?: string;
   careInfo?: string;
   tags: string[];
-  addOns: ServiceAddOn[];
   sortOrder: number;
   isFeatured?: boolean;
   isTrending?: boolean;
-  /** SEO overrides — storefront falls back to name/tagline/images[0] when unset. */
   metaTitle?: string;
   metaDescription?: string;
   ogImage?: string;
   updatedAt: string;
 };
 
-export type Testimonial = {
-  id: string;
-  name: string;
-  city: string;
-  quote: string;
-  rating: number;
-  image: string;
-};
+// Compatibility aliases keep public routes concise while all domain language
+// remains catalog/product based rather than tied to the prior vertical.
+export type DecorCategory = CatalogCategory;
+export type DecorSubcategory = CatalogSubcategory;
+export type DecorService = CatalogProduct;
 
-export type ServiceCity = {
-  slug: string;
-  name: string;
-};
+export type ServiceCity = { slug: string; name: string };

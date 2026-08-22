@@ -9,29 +9,23 @@ import {
   LayoutGrid,
   Layers,
   FolderTree,
-  PartyPopper,
-  Gift,
-  CalendarCheck,
   Users as UsersIcon,
-  Store,
   House,
+  Boxes,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
-  { href: "/admin/dashboard/bookings", label: "Bookings", icon: CalendarCheck, exact: false },
+  { href: "/admin/dashboard/inventory", label: "Inventory", icon: Boxes, exact: false },
   { href: "/admin/dashboard/categories", label: "Listings", icon: Layers, exact: false },
   { href: "/admin/dashboard/homepage", label: "Homepage", icon: House, exact: false },
-  { href: "/admin/dashboard/vendors", label: "Vendors", icon: Store, exact: false },
   { href: "/admin/dashboard/users", label: "Users", icon: UsersIcon, exact: false },
 ];
 
 const LISTING_TABS = [
   { href: "/admin/dashboard/categories", label: "Categories", icon: Layers },
   { href: "/admin/dashboard/subcategories", label: "Subcategories", icon: FolderTree },
-  { href: "/admin/dashboard/products", label: "Products", icon: PartyPopper },
-  { href: "/admin/dashboard/addons", label: "Add-ons", icon: Gift },
-  { href: "/admin/dashboard/decorations", label: "Decorations", icon: PartyPopper },
+  { href: "/admin/dashboard/products", label: "Used items", icon: Layers },
 ];
 
 const HOMEPAGE_TABS = [{ href: "/admin/dashboard/homepage", label: "Hero carousel", icon: House }];

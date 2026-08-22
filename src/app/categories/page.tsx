@@ -7,7 +7,7 @@ import { breadcrumbJsonLd } from "@/lib/jsonld";
 import { getCategories } from "@/data";
 import { CategoriesGrid } from "./categories-grid";
 
-const TITLE = "All Decoration Categories";
+const TITLE = "Shop used electronics";
 const DESCRIPTION =
   "Browse every occasion we decorate for — birthdays, weddings, baby showers, corporate events and more.";
 
@@ -29,7 +29,7 @@ export default async function CategoriesPage() {
         <header className="mb-6">
           <p className="text-xs font-bold uppercase tracking-widest text-accent">Explore</p>
           <h1 className="mt-1 font-display text-4xl leading-tight md:text-5xl">
-            Every <span className="italic text-gradient-brand">occasion</span>, covered
+            Shop <span className="italic text-gradient-brand">used electronics</span>
           </h1>
         </header>
 

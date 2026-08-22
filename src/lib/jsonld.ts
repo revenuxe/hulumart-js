@@ -11,7 +11,7 @@ export function jsonLdScript(data: unknown): string {
 // Real profile URLs only (Footer.tsx's YouTube/Twitter icons are still
 // placeholder "#" links) — schema.org sameAs should only list working
 // social profiles.
-const SAME_AS = ["https://www.instagram.com/baraabarmade/", "https://www.linkedin.com/company/baraabar"];
+const SAME_AS: string[] = [];
 
 export function organizationJsonLd() {
   return {
@@ -70,9 +70,7 @@ export function productJsonLd(service: DecorService, categoryName: string) {
 
   return {
     "@context": "https://schema.org",
-    // Google Product rich results require a Product root. These are booked
-    // event-decoration packages, so they belong to Google's product-snippet
-    // use case (a customer requests a booking rather than checking out here).
+    // Google Product rich results require a Product root.
     "@type": "Product",
     "@id": `${url}#product`,
     name: service.name,
