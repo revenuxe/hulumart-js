@@ -1231,6 +1231,14 @@ export type Database = {
         }
         Returns: string
       }
+      place_order_with_offline_payment: {
+        Args: {
+          _fulfilment_method: string
+          _order_id: string
+          _payment_method: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
