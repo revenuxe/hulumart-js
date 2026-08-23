@@ -17,7 +17,7 @@ export async function generateMetadata({
   const { category: categorySlug } = await params;
   const category = await getCategoryBySlug(categorySlug);
   if (!category) return {};
-  const title = `${category.name} Decoration`;
+  const title = `Used ${category.name} in Bengaluru`;
   const description =
     category.tagline ||
     `Book ${category.name.toLowerCase()} decoration — designed and installed by trained decorators.`;

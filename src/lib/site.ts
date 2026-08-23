@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = "https://www.zapiboo.com";
+const DEFAULT_SITE_URL = "https://www.hulumart.com";
 
 function getSiteUrl() {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
@@ -21,9 +21,9 @@ export const SITE_URL = getSiteUrl();
 export const SITE_NAME = "Hulumart";
 
 export const CONTACT = {
-  phone: "+91 98862 85028",
-  phoneHref: "tel:+919886285028",
-  whatsappHref: "https://wa.me/919886285028",
+  phone: "+91 98865 79923",
+  phoneHref: "tel:+919886579923",
+  whatsappHref: "https://wa.me/919886579923",
   email: "hulumart.com@gmail.com",
   address: {
     line1: "No 11, 4th Cross, 2nd Main Road",

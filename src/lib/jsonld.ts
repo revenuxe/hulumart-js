@@ -1,4 +1,4 @@
-import { CONTACT, SITE_NAME, SITE_URL } from "@/lib/site";
+import { CONTACT, CONTACT_MAPS_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 import type { DecorService } from "@/data/types";
 
 // Escaping `<` prevents a `</script>`-like sequence in interpolated content
@@ -34,7 +34,31 @@ export function organizationJsonLd() {
       addressCountry: CONTACT.address.country,
     },
     areaServed: "Bengaluru",
+    hasMap: CONTACT_MAPS_URL,
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: CONTACT.phone,
+      contactType: "customer service",
+      areaServed: "IN",
+      availableLanguage: ["en", "hi", "kn"],
+    },
     sameAs: SAME_AS,
+  };
+}
+
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE_URL}/#website`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    publisher: { "@id": `${SITE_URL}/#organization` },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/categories?search={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
   };
 }
 
@@ -80,7 +104,7 @@ export function productJsonLd(service: DecorService, categoryName: string) {
     category: categoryName,
     brand: {
       "@type": "Brand",
-      name: SITE_NAME,
+      name: service.brand || SITE_NAME,
     },
     // A typed page node is important: an @id on its own is an invalid object
     // type for Google's structured-data parser and produces the parent_node
@@ -94,7 +118,7 @@ export function productJsonLd(service: DecorService, categoryName: string) {
       url,
       priceCurrency: "INR",
       price: service.priceDiscounted,
-      availability: "https://schema.org/InStock",
+      availability: service.stockQuantity === 0 ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
       seller: {
         "@type": "Organization",
         "@id": `${SITE_URL}/#organization`,
@@ -102,6 +126,7 @@ export function productJsonLd(service: DecorService, categoryName: string) {
       },
       areaServed: "Bengaluru",
     },
+    ...(service.conditionGrade ? { itemCondition: "https://schema.org/UsedCondition" } : {}),
     ...(service.reviewCount > 0
       ? {
           aggregateRating: {

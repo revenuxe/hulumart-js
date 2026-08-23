@@ -57,6 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(s.updatedAt),
     changeFrequency: "weekly" as const,
     priority: 0.9,
+    images: s.images.filter(Boolean),
   }));
 
   return [...staticPages, ...categoryPages, ...subcategoryIndexPages, ...subcategoryPages, ...productPages];

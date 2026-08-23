@@ -22,7 +22,7 @@ export async function generateMetadata({
     getSubcategoryBySlug(categorySlug, subcategorySlug),
   ]);
   if (!subcategory) return {};
-  const title = subcategory.name;
+  const title = `Used ${subcategory.name} in Bengaluru`;
   const description =
     subcategory.tagline || `${subcategory.name} decoration${category ? ` for your ${category.name.toLowerCase()}` : ""}.`;
   return {

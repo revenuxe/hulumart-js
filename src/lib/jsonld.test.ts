@@ -29,16 +29,16 @@ describe("productJsonLd", () => {
 
     expect(jsonLd).toMatchObject({
       "@type": "Product",
-      "@id": "https://www.baraabar.com/categories/smartphones/pixel-8-pro#product",
+      "@id": "https://www.hulumart.com/categories/smartphones/pixel-8-pro#product",
       mainEntityOfPage: {
         "@type": "WebPage",
-        "@id": "https://www.baraabar.com/categories/smartphones/pixel-8-pro",
+        "@id": "https://www.hulumart.com/categories/smartphones/pixel-8-pro",
       },
       offers: {
         "@type": "Offer",
         seller: {
           "@type": "Organization",
-          "@id": "https://www.zapiboo.com/#organization",
+          "@id": "https://www.hulumart.com/#organization",
         },
       },
     });
