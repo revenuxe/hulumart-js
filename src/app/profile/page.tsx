@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, MapPin, Bell, HelpCircle, Gift, LogIn, CalendarCheck } from "lucide-react";
+import { ChevronRight, MapPin, Bell, HelpCircle, Gift, LogIn } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
 import { createClient } from "@/lib/supabase/server";
@@ -43,22 +43,15 @@ export default async function ProfilePage() {
     );
   }
 
-  const [{ data: profile }, { count: addresses }, { count: bookingsCount }] = await Promise.all([
+  const [{ data: profile }, { count: addresses }] = await Promise.all([
     supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle(),
     supabase.from("addresses").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("user_id", user.id),
   ]);
 
   const email = user.email ?? "";
   const initial = (profile?.full_name ?? email).trim().charAt(0).toUpperCase();
 
   const rows: { icon: React.ElementType; label: string; meta?: string; href?: string }[] = [
-    {
-      icon: CalendarCheck,
-      label: "My Orders",
-      meta: bookingsCount ? `${bookingsCount} order${bookingsCount === 1 ? "" : "s"}` : "No orders yet",
-      href: "/bookings",
-    },
     {
       icon: MapPin,
       label: "Addresses",

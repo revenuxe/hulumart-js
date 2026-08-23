@@ -3,4 +3,4 @@
 -- products (and therefore the same images) already marked is_featured, as
 -- a quick way to populate it; admin can re-curate the Trending flag per
 -- product independently going forward.
-UPDATE public.products SET is_trending = true WHERE is_featured = true;
+-- No starter records: trending products are curated in the Hulumart admin.

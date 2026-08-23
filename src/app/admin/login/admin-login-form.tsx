@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Lock, Mail, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 
-const ADMIN_EMAIL = "admin@zapiboo.com";
+const ADMIN_EMAIL = "admin@hulumart.com";
 
 export function AdminLoginForm() {
   const router = useRouter();

@@ -28,10 +28,4 @@ WHERE category_id IN (SELECT id FROM public.categories WHERE is_active = false);
 DELETE FROM public.subcategories WHERE is_active = false;
 DELETE FROM public.categories WHERE is_active = false;
 
-DELETE FROM public.homepage_hero_slides;
-INSERT INTO public.homepage_hero_slides (
-  desktop_image_url, kicker, title, subtitle, action_label, action_url, sort_order
-) VALUES
-  ('https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=85&w=1400&auto=format&fit=crop', 'Tested pre-owned tech', 'Your next device, for less.', 'Clear condition notes, real photos and stock you can trust.', 'Shop smartphones', '/categories/smartphones', 1),
-  ('https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=85&w=1400&auto=format&fit=crop', 'Work. Study. Create.', 'Quality laptops, ready for a new owner.', 'Each listing shows age, condition, contents and warranty details.', 'Shop laptops', '/categories/laptops', 2),
-  ('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=85&w=1400&auto=format&fit=crop', 'Straightforward used tech', 'Know exactly what you are buying.', 'Compare condition, included accessories and available stock before checkout.', 'Browse all electronics', '/categories', 3);
+-- No starter homepage content: slides are managed in the Hulumart admin.

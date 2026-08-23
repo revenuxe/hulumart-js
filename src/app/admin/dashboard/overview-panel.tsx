@@ -1,11 +1,10 @@
 "use client";
 
 import { memo, useEffect, useState } from "react";
-import { CalendarCheck, Flame, Layers, Loader2, Package, Sparkles } from "lucide-react";
+import { Flame, Layers, Loader2, Package, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Stats = {
-  bookingCount: number;
   totalProducts: number;
   activeProducts: number;
   trendingCount: number;
@@ -19,15 +18,13 @@ export const OverviewPanel = memo(function OverviewPanel() {
   useEffect(() => {
     (async () => {
       const supabase = createClient();
-      const [{ data: products }, { count: categoryCount }, { count: bookingCount }] = await Promise.all([
+      const [{ data: products }, { count: categoryCount }] = await Promise.all([
         supabase.from("products").select("price,sale_price,is_active,is_trending,is_featured"),
         supabase.from("categories").select("id", { count: "exact", head: true }),
-        supabase.from("bookings").select("id", { count: "exact", head: true }),
       ]);
       const rows = products ?? [];
       const activeProducts = rows.filter((p) => p.is_active).length;
       setStats({
-        bookingCount: bookingCount ?? 0,
         totalProducts: rows.length,
         activeProducts,
         trendingCount: rows.filter((p) => p.is_trending).length,
@@ -40,7 +37,6 @@ export const OverviewPanel = memo(function OverviewPanel() {
   if (!stats) return <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />;
 
   const cards = [
-    { label: "Bookings", value: stats.bookingCount, icon: CalendarCheck },
     { label: "Total products", value: stats.totalProducts, icon: Package },
     { label: "Active products", value: stats.activeProducts, icon: Sparkles },
     { label: "Trending", value: stats.trendingCount, icon: Flame },
