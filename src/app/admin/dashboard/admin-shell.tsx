@@ -12,6 +12,7 @@ import {
   Users as UsersIcon,
   House,
   Boxes,
+  HandCoins,
 } from "lucide-react";
 
 const NAV = [
@@ -20,7 +21,10 @@ const NAV = [
   { href: "/admin/dashboard/categories", label: "Listings", icon: Layers, exact: false },
   { href: "/admin/dashboard/homepage", label: "Homepage", icon: House, exact: false },
   { href: "/admin/dashboard/users", label: "Users", icon: UsersIcon, exact: false },
+  { href: "/admin/dashboard/sell", label: "Sell Now", icon: HandCoins, exact: false },
 ];
+
+const SELL_TABS = [{ href: "/admin/dashboard/sell", label: "Leads", icon: HandCoins }];
 
 const LISTING_TABS = [
   { href: "/admin/dashboard/categories", label: "Categories", icon: Layers },
@@ -35,6 +39,7 @@ export function AdminShell({ email, children }: { email: string; children: React
   const router = useRouter();
   const activeListing = LISTING_TABS.some((tab) => pathname.startsWith(tab.href));
   const activeHomepage = pathname.startsWith("/admin/dashboard/homepage");
+  const activeSell = pathname.startsWith("/admin/dashboard/sell");
 
   async function signOut() {
     const supabase = createClient();
@@ -75,7 +80,7 @@ export function AdminShell({ email, children }: { email: string; children: React
               ? activeListing
               : n.label === "Homepage"
                 ? activeHomepage
-                : n.exact ? pathname === n.href : pathname.startsWith(n.href);
+              : n.label === "Sell Now" ? activeSell : n.exact ? pathname === n.href : pathname.startsWith(n.href);
             return (
               <Link
                 key={n.href}
@@ -92,10 +97,10 @@ export function AdminShell({ email, children }: { email: string; children: React
             );
           })}
         </nav>
-        {(activeListing || activeHomepage) && (
+        {(activeListing || activeHomepage || activeSell) && (
           <nav aria-label={activeListing ? "Listing sections" : "Homepage sections"} className="border-t border-border/70 bg-muted/30">
             <div className="no-scrollbar mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2">
-              {(activeListing ? LISTING_TABS : HOMEPAGE_TABS).map((tab) => {
+              {(activeListing ? LISTING_TABS : activeSell ? SELL_TABS : HOMEPAGE_TABS).map((tab) => {
                 const active = pathname.startsWith(tab.href);
                 const Icon = tab.icon;
                 return <Link key={tab.href} href={tab.href} className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${active ? "bg-card text-primary shadow-sm ring-1 ring-border" : "text-muted-foreground hover:bg-card/70 hover:text-primary"}`}><Icon className="h-3.5 w-3.5" />{tab.label}</Link>;

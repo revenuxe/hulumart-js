@@ -24,7 +24,7 @@ export const CONTACT = {
   phone: "+91 98862 85028",
   phoneHref: "tel:+919886285028",
   whatsappHref: "https://wa.me/919886285028",
-  email: "support@zapiboo.com",
+  email: "hulumart.com@gmail.com",
   address: {
     line1: "No 11, 4th Cross, 2nd Main Road",
     line2: "Shampura",

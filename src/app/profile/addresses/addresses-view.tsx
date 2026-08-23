@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, MapPin, Plus, Star, Trash2 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
@@ -24,14 +25,24 @@ const emptyForm = {
 export function AddressesView({
   userId,
   initialRows,
+  returnTo,
+  editId,
 }: {
   userId: string;
   initialRows: AddressRow[];
+  returnTo?: "/checkout";
+  editId?: string;
 }) {
+  const router = useRouter();
   const [rows, setRows] = useState(initialRows);
   const [editingId, setEditingId] = useState<string | null | "new">(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const addressToEdit = editId ? initialRows.find((row) => row.id === editId) : undefined;
+    if (addressToEdit) startEdit(addressToEdit);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -90,10 +101,16 @@ export function AddressesView({
         phone: form.phone,
         is_default: form.is_default,
       };
+      let savedAddressId = editingId && editingId !== "new" ? editingId : "";
       if (editingId && editingId !== "new") {
         await supabase.from("addresses").update(payload).eq("id", editingId);
       } else {
-        await supabase.from("addresses").insert(payload);
+        const { data } = await supabase.from("addresses").insert(payload).select("id").single();
+        savedAddressId = data?.id ?? "";
+      }
+      if (returnTo && savedAddressId) {
+        router.push(`${returnTo}?address=${encodeURIComponent(savedAddressId)}`);
+        return;
       }
       setEditingId(null);
       await load();
@@ -133,7 +150,7 @@ export function AddressesView({
               className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Addresses
+              {returnTo ? "Back to checkout" : "Addresses"}
             </button>
             <h1 className="mt-3 font-display text-3xl">
               {editingId === "new" ? "Add address" : "Edit address"}
@@ -212,11 +229,11 @@ export function AddressesView({
         ) : (
           <>
             <Link
-              href="/profile"
+              href={returnTo ?? "/profile"}
               className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Profile
+              {returnTo ? "Back to checkout" : "Profile"}
             </Link>
             <h1 className="mt-3 font-display text-3xl">Addresses</h1>
             <p className="mt-1 text-sm text-muted-foreground">

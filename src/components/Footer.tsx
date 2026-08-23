@@ -4,6 +4,7 @@ import Link from "next/link";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon } from "@/components/SocialIcons";
 
 const LEGAL_LINKS = [
+  { href: "/sell", label: "Sell with us" },
   { href: "/contact", label: "Contact Us" },
   { href: "/terms", label: "Terms & Conditions" },
   { href: "/privacy", label: "Privacy Policy" },
