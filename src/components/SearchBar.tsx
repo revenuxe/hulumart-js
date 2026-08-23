@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Layers, PartyPopper, Search } from "lucide-react";
 import { useCatalogSearch } from "@/lib/use-catalog-search";
 
-const PHRASES = ["birthday decor", "wedding decor", "baby shower", "corporate event"];
+const PHRASES = ["used car", "motorbike", "sofa set", "iPhone 14"];
 const TYPE_MS = 70;
 const DELETE_MS = 40;
 const HOLD_MS = 1400;
@@ -131,7 +131,7 @@ export function SearchBar({
           onKeyDown={(e) => {
             if (e.key === "Escape") setFocused(false);
           }}
-          placeholder={placeholder ?? (showTyping ? `Search ${typed}` : "Search decorations…")}
+          placeholder={placeholder ?? (showTyping ? `Search ${typed}` : "Search used items")}
           className="min-w-0 flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground"
         />
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-glow">

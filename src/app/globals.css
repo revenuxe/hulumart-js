@@ -37,8 +37,8 @@
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
 
-  --font-display: var(--font-playfair-display), ui-serif, Georgia, serif;
-  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -53,42 +53,42 @@
   --radius: 1rem;
 
   /* Brand core */
-  /* Zapiboo palette: violet leads actions; teal is a restrained supporting accent. */
-  --brand-purple: #6f36c9;
-  --brand-pink: #5b2fa4;
-  --brand-ink: #452174;
+  /* Hulumart palette: blue drives actions, navy provides contrast, green is the supporting accent. */
+  --brand-purple: #1769dc;
+  --brand-pink: #00a63c;
+  --brand-ink: #06295f;
 
   /* Surfaces */
-  --background: #fbfaff;
-  --foreground: #452174;
+  --background: #f8fbff;
+  --foreground: #06295f;
   --surface: #ffffff;
   --surface-elevated: oklch(1 0 0);
 
   --card: oklch(1 0 0);
-  --card-foreground: #452174;
+  --card-foreground: #06295f;
   --popover: oklch(1 0 0);
-  --popover-foreground: #452174;
+  --popover-foreground: #06295f;
 
-  --primary: #452174;
+  --primary: #06295f;
   --primary-foreground: oklch(0.99 0.008 75);
   --secondary: #ffffff;
-  --secondary-foreground: #452174;
-  --muted: #f5f2fa;
+  --secondary-foreground: #06295f;
+  --muted: #f1f6fc;
   --muted-foreground: #64748b;
-  --accent: #0b8c94;
+  --accent: #00a63c;
   --accent-foreground: oklch(0.99 0.008 75);
   --destructive: oklch(0.6 0.24 27);
   --destructive-foreground: oklch(0.99 0.005 320);
-  --border: #e5def0;
-  --input: #e5def0;
-  --ring: #5b2fa4;
+  --border: #dce7f4;
+  --input: #dce7f4;
+  --ring: #1769dc;
 
   /* Signature gradients */
-  --gradient-brand: linear-gradient(135deg, #452174 0%, #6f36c9 100%);
+  --gradient-brand: linear-gradient(135deg, #06295f 0%, #1769dc 100%);
   --gradient-brand-soft: linear-gradient(
     135deg,
-    rgb(69 33 116 / 0.10) 0%,
-    rgb(111 54 201 / 0.10) 100%
+    rgb(6 41 95 / 0.10) 0%,
+    rgb(23 105 220 / 0.10) 100%
   );
   --gradient-aurora: radial-gradient(
       1200px 600px at 10% -10%,
@@ -107,9 +107,9 @@
   /* Shadows */
   --shadow-glass:
     0 1px 0 0 oklch(1 0 0 / 0.6) inset, 0 8px 24px -8px oklch(0.22 0.07 245 / 0.12);
-  --shadow-elevated: 0 20px 44px -20px rgb(69 33 116 / 0.25);
-  --shadow-glow: 0 12px 28px -12px rgb(91 47 164 / 0.28);
-  --shadow-card: 0 2px 8px -2px rgb(69 33 116 / 0.08), 0 18px 34px -16px rgb(69 33 116 / 0.18);
+  --shadow-elevated: 0 20px 44px -20px rgb(6 41 95 / 0.25);
+  --shadow-glow: 0 12px 28px -12px rgb(13 95 212 / 0.28);
+  --shadow-card: 0 2px 8px -2px rgb(6 41 95 / 0.08), 0 18px 34px -16px rgb(6 41 95 / 0.18);
 
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -132,17 +132,17 @@
   --card-foreground: oklch(0.98 0.005 320);
   --popover: oklch(0.19 0.06 245);
   --popover-foreground: oklch(0.98 0.005 320);
-  --primary: oklch(0.7 0.2 305);
+  --primary: #62a2ff;
   --primary-foreground: oklch(0.14 0.05 245);
   --secondary: oklch(0.25 0.07 245);
   --secondary-foreground: oklch(0.98 0.005 320);
   --muted: oklch(0.25 0.07 245);
   --muted-foreground: oklch(0.72 0.03 245);
-  --accent: oklch(0.72 0.22 8);
+  --accent: #31cf6a;
   --accent-foreground: oklch(0.14 0.05 245);
   --border: oklch(1 0 0 / 0.08);
   --input: oklch(1 0 0 / 0.1);
-  --ring: oklch(0.7 0.2 305);
+  --ring: #62a2ff;
   --sidebar: hsl(240 5.9% 10%);
   --sidebar-foreground: hsl(240 4.8% 95.9%);
   --sidebar-primary: hsl(224.3 76.3% 48%);
@@ -170,7 +170,7 @@
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3 {
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
   }
   ::selection {
     background: var(--brand-pink);
@@ -188,14 +188,19 @@
 }
 
 @utility text-gradient-brand {
-  background-image: var(--gradient-brand);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  color: var(--brand-purple);
 }
 
 @utility bg-gradient-brand {
   background-image: var(--gradient-brand);
+}
+
+/* Keep every actionable button on the single Hulumart green, while cards and
+   footer panels can still use the navy-to-blue brand gradient. */
+:is(button, a).bg-gradient-brand,
+:is(button, a).bg-primary {
+  background-color: var(--brand-pink) !important;
+  background-image: none !important;
 }
 
 @utility bg-aurora {

@@ -56,7 +56,7 @@ export function AdminLoginForm() {
           </div>
           <h1 className="mt-4 font-display text-3xl leading-tight">Admin sign-in</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Restricted access. Sign in with your Zapiboo admin account.
+            Restricted access. Sign in with your Hulumart admin account.
           </p>
 
           <form onSubmit={submit} className="mt-6 space-y-3">
@@ -101,7 +101,7 @@ export function AdminLoginForm() {
         </div>
 
         <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          Zapiboo · Admin Console
+          Hulumart · Admin Console
         </p>
       </div>
     </div>

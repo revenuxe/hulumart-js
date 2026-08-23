@@ -7,8 +7,8 @@ import { ServiceGridSearch } from "@/components/ServiceGridSearch";
 import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/jsonld";
 import { getFeaturedServices } from "@/data";
 
-const TITLE = "Featured Setups";
-const DESCRIPTION = "Our team's hand-picked event decoration setups.";
+const TITLE = "Featured Pre-Owned Items";
+const DESCRIPTION = "Our team's hand-picked pre-owned items across the marketplace.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -31,14 +31,14 @@ export default async function FeaturedPage() {
         <section className="mx-auto w-full max-w-md px-5 pt-8 md:max-w-6xl md:px-8 md:pt-12">
           <p className="text-xs font-bold uppercase tracking-widest text-accent">Hand-picked</p>
           <h1 className="mt-1 font-display text-3xl leading-tight md:text-5xl">
-            Featured <span className="italic text-gradient-brand">setups</span>
+            Featured <span className="italic text-gradient-brand">items</span>
           </h1>
           <p className="mt-2 max-w-md text-sm text-muted-foreground md:text-base">
-            Our team&apos;s favourite setups, curated for you.
+            Our team&apos;s favourite pre-owned finds, curated for you.
           </p>
         </section>
 
-        <ServiceGridSearch services={services} searchPlaceholder="Search featured setups…" cardBadge="featured" />
+        <ServiceGridSearch services={services} searchPlaceholder="Search featured items…" cardBadge="featured" />
       </main>
       <Footer />
       <BottomNav />

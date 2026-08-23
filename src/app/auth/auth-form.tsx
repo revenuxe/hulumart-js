@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import logo from "@/assets/zapiboo-logo-cropped.webp";
+import logo from "@/assets/hulumart-logo.webp";
 
 export function AuthForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
@@ -63,7 +63,7 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
   return (
     <div className="min-h-dvh bg-gradient-to-br from-background via-background to-muted/50 pb-16">
       <header className="mx-auto flex max-w-md items-center justify-between px-5 pt-[max(1rem,env(safe-area-inset-top))]">
-        {/* Goes back to wherever the user came from (e.g. the booking wizard,
+        {/* Goes back to wherever the user came from (e.g. the checkout flow,
             mid-flow) rather than forcing home. */}
         <button
           onClick={() => window.history.back()}
@@ -75,10 +75,10 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
         <Link href="/" className="flex items-center">
           <Image
             src={logo}
-            alt="Zapiboo — Play, Laugh, Discover"
-            width={74}
-            height={44}
-            className="h-11 w-[74px] object-contain"
+            alt="Hulumart — Buy it. Sell it. Repeat it."
+            width={160}
+            height={30}
+            className="h-auto w-32 object-contain"
           />
         </Link>
         <span className="w-10" />
@@ -90,8 +90,8 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {mode === "signin"
-            ? "Sign in to track orders, save measurements, and manage bookings."
-            : "Join Zapiboo to save your details and manage bookings."}
+            ? "Sign in to track orders, save addresses, and manage purchases."
+            : "Join Hulumart to save your details and manage purchases."}
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-3">

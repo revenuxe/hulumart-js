@@ -1,4 +1,4 @@
-import logo from "@/assets/zapiboo-logo-cropped.webp";
+import logo from "@/assets/hulumart-logo.webp";
 import Image from "next/image";
 import Link from "next/link";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon } from "@/components/SocialIcons";
@@ -15,23 +15,23 @@ export function Footer() {
       <div className="rounded-[2rem] bg-gradient-brand p-6 text-primary-foreground shadow-elevated md:flex md:items-center md:justify-between md:gap-10 md:rounded-[3rem] md:p-12">
         <h2 className="font-display text-3xl leading-tight md:text-5xl">
           Ready to find your next<br />
-          <span className="italic">great device</span>?
+          <span className="italic">great find</span>?
         </h2>
         <Link
           href="/categories"
           className="mt-5 flex w-full items-center justify-center rounded-full bg-white py-3.5 text-sm font-bold text-primary shadow-glow active:scale-[0.98] md:mt-0 md:w-auto md:px-10 md:py-4 md:text-base"
         >
-          Shop electronics
+          Explore marketplace
         </Link>
       </div>
 
       <div className="mt-8 flex items-center justify-between">
         <Image
           src={logo}
-          alt="Zapiboo — Play, Laugh, Discover"
-          width={190}
-          height={112}
-          className="h-24 w-[163px] object-contain md:h-28 md:w-[190px]"
+          alt="Hulumart — Buy it. Sell it. Repeat it."
+          width={300}
+          height={57}
+          className="h-auto w-44 object-contain md:w-60"
         />
         <div className="flex gap-2">
           {[
@@ -65,7 +65,7 @@ export function Footer() {
       </div>
 
       <p className="mt-6 text-center text-[11px] text-muted-foreground">
-        Play · Laugh · Discover · © {new Date().getFullYear()} Zapiboo
+        Buy it · Sell it · Repeat it · © {new Date().getFullYear()} Hulumart
       </p>
     </footer>
   );

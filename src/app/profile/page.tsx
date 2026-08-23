@@ -27,9 +27,9 @@ export default async function ProfilePage() {
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-gradient-brand text-primary-foreground shadow-glow">
             <LogIn className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-3xl">Sign in to Zapiboo</h1>
+          <h1 className="mt-5 font-display text-3xl">Sign in to Hulumart</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Create an account or sign in to save addresses and book decorations faster.
+            Create an account or sign in to save addresses and manage orders faster.
           </p>
           <Link
             href="/auth?redirect=%2Fprofile"
@@ -55,8 +55,8 @@ export default async function ProfilePage() {
   const rows: { icon: React.ElementType; label: string; meta?: string; href?: string }[] = [
     {
       icon: CalendarCheck,
-      label: "My Bookings",
-      meta: bookingsCount ? `${bookingsCount} booking${bookingsCount === 1 ? "" : "s"}` : "No bookings yet",
+      label: "My Orders",
+      meta: bookingsCount ? `${bookingsCount} order${bookingsCount === 1 ? "" : "s"}` : "No orders yet",
       href: "/bookings",
     },
     {
@@ -81,7 +81,7 @@ export default async function ProfilePage() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate font-display text-2xl leading-tight">
-                {profile?.full_name ?? "Zapiboo member"}
+                {profile?.full_name ?? "Hulumart member"}
               </p>
               <p className="truncate text-xs opacity-80">{email}</p>
             </div>

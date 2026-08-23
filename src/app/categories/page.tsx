@@ -7,9 +7,9 @@ import { breadcrumbJsonLd } from "@/lib/jsonld";
 import { getCategories } from "@/data";
 import { CategoriesGrid } from "./categories-grid";
 
-const TITLE = "Shop used electronics";
+const TITLE = "Shop pre-owned items";
 const DESCRIPTION =
-  "Browse every occasion we decorate for — birthdays, weddings, baby showers, corporate events and more.";
+  "Browse quality-checked pre-owned cars, bikes, furniture, electronics, and more.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -29,7 +29,7 @@ export default async function CategoriesPage() {
         <header className="mb-6">
           <p className="text-xs font-bold uppercase tracking-widest text-accent">Explore</p>
           <h1 className="mt-1 font-display text-4xl leading-tight md:text-5xl">
-            Shop <span className="italic text-gradient-brand">used electronics</span>
+            Shop <span className="italic text-gradient-brand">pre-owned items</span>
           </h1>
         </header>
 

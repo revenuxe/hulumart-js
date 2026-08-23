@@ -18,7 +18,7 @@ function getSiteUrl() {
 // `new URL(SITE_URL)` during the production build.
 export const SITE_URL = getSiteUrl();
 
-export const SITE_NAME = "Zapiboo";
+export const SITE_NAME = "Hulumart";
 
 export const CONTACT = {
   phone: "+91 98862 85028",

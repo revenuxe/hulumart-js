@@ -8,7 +8,7 @@ import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/jsonld";
 import { getTrendingServices } from "@/data";
 
 const TITLE = "Trending Now";
-const DESCRIPTION = "Our most-loved event decoration setups, all in one place.";
+const DESCRIPTION = "Our most-loved pre-owned items, all in one place.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -31,10 +31,10 @@ export default async function TrendingPage() {
         <section className="mx-auto w-full max-w-md px-5 pt-8 md:max-w-6xl md:px-8 md:pt-12">
           <p className="text-xs font-bold uppercase tracking-widest text-accent">Trending now</p>
           <h1 className="mt-1 font-display text-3xl leading-tight md:text-5xl">
-            Trending <span className="italic text-gradient-brand">setups</span>
+            Trending <span className="italic text-gradient-brand">items</span>
           </h1>
           <p className="mt-2 max-w-md text-sm text-muted-foreground md:text-base">
-            The setups our customers are booking the most, right now.
+            The pre-owned finds our customers are shopping for the most, right now.
           </p>
         </section>
 

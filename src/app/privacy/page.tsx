@@ -9,7 +9,7 @@ import { CONTACT, CONTACT_ADDRESS_FULL, SITE_NAME } from "@/lib/site";
 
 const TITLE = "Privacy Policy";
 const DESCRIPTION =
-  "How Zapiboo collects, uses, and protects your personal information when you book event decoration services.";
+  "How Hulumart collects, uses, and protects your personal information when you use our marketplace.";
 const LAST_UPDATED = "August 3, 2026";
 
 export const metadata: Metadata = {

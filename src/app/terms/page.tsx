@@ -9,7 +9,7 @@ import { CONTACT, CONTACT_ADDRESS_FULL, SITE_NAME } from "@/lib/site";
 
 const TITLE = "Terms & Conditions";
 const DESCRIPTION =
-  "The terms and conditions governing venue bookings, event decoration setup, cancellations and refunds on Zapiboo.";
+  "The terms and conditions governing marketplace purchases, sales, cancellations and refunds on Hulumart.";
 const LAST_UPDATED = "August 3, 2026";
 
 export const metadata: Metadata = {

@@ -36,7 +36,7 @@ export default async function Home() {
           services={trendingServices}
           eyebrow="Trending now"
           title="Trending"
-          titleAccent="electronics"
+          titleAccent="items"
           viewAllHref="/trending"
           cardBadge="trending"
         />

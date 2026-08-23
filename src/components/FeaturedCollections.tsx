@@ -29,7 +29,7 @@ export function FeaturedCollections({
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-accent">{eyebrow}</p>
-          <h2 className="mt-1 font-display text-3xl leading-tight md:text-5xl">
+          <h2 className="mt-1 font-display text-2xl leading-[1.15] md:text-4xl">
             {title} <span className="italic text-gradient-brand">{titleAccent}</span>
           </h2>
         </div>

@@ -9,9 +9,8 @@ import { useCatalogSearch } from "@/lib/use-catalog-search";
 type PageHit = { href: string; name: string; description: string };
 
 const STATIC_PAGES: PageHit[] = [
-  { href: "/categories", name: "Browse Decorations", description: "All occasions & services" },
-  { href: "/cart", name: "Your Cart", description: "Review items before booking" },
-  { href: "/book", name: "Book an Event", description: "Complete your booking" },
+  { href: "/categories", name: "Browse marketplace", description: "Cars, bikes, furniture, electronics and more" },
+  { href: "/cart", name: "Your Cart", description: "Review items before checkout" },
   { href: "/profile", name: "Profile", description: "Your account and addresses" },
   { href: "/contact", name: "Contact Us", description: "Phone, email and studio address" },
   { href: "/terms", name: "Terms & Conditions", description: "" },
@@ -69,9 +68,9 @@ export function SearchOverlay({
         <DialogPrimitive.Content
           className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-2xl p-4 pt-[max(1rem,env(safe-area-inset-top))] outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-4"
         >
-          <DialogPrimitive.Title className="sr-only">Search Zapiboo</DialogPrimitive.Title>
+          <DialogPrimitive.Title className="sr-only">Search Hulumart</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">
-            Search our decoration categories, services and pages
+            Search cars, bikes, furniture, electronics and more
           </DialogPrimitive.Description>
           <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-elevated">
             <div className="flex items-center gap-2 border-b border-border px-4 py-3">
@@ -80,7 +79,7 @@ export function SearchOverlay({
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search decorations, categories and more…"
+                placeholder="Search cars, bikes, furniture and more"
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               />
               <DialogPrimitive.Close

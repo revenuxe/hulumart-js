@@ -53,7 +53,7 @@ export function AdminShell({ email, children }: { email: string; children: React
             </span>
             <span>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Zapiboo
+                Hulumart
               </p>
               <p className="-mt-0.5 text-sm font-bold">Admin Console</p>
             </span>
