@@ -22,7 +22,7 @@ function Thumb({
           fill
           loading="lazy"
           sizes="96px"
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
         />
       ) : (
         <div className="h-full w-full bg-gradient-brand" />
