@@ -817,6 +817,45 @@ export type Database = {
           },
         ]
       }
+      product_content_library: {
+        Row: {
+          body: string | null
+          created_at: string
+          faqs: Json
+          id: string
+          included: string[]
+          is_active: boolean
+          kind: string
+          name: string
+          not_included: string[]
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          faqs?: Json
+          id?: string
+          included?: string[]
+          is_active?: boolean
+          kind: string
+          name: string
+          not_included?: string[]
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          faqs?: Json
+          id?: string
+          included?: string[]
+          is_active?: boolean
+          kind?: string
+          name?: string
+          not_included?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           approximate_age_months: number | null

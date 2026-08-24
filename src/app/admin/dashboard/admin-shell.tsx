@@ -13,6 +13,7 @@ import {
   House,
   Boxes,
   HandCoins,
+  FileText,
 } from "lucide-react";
 
 const NAV = [
@@ -30,6 +31,7 @@ const LISTING_TABS = [
   { href: "/admin/dashboard/categories", label: "Categories", icon: Layers },
   { href: "/admin/dashboard/subcategories", label: "Subcategories", icon: FolderTree },
   { href: "/admin/dashboard/products", label: "Used items", icon: Layers },
+  { href: "/admin/dashboard/content-library", label: "Content library", icon: FileText },
 ];
 
 const HOMEPAGE_TABS = [{ href: "/admin/dashboard/homepage", label: "Hero carousel", icon: House }];
