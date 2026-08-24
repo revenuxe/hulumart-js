@@ -13,6 +13,10 @@ const ITEMS = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  // The bottom navigation is also rendered during the initial client render.
+  // Treat an unresolved pathname as the homepage so Home does not flash as
+  // inactive before Next finishes hydrating the current route.
+  const activePathname = pathname || "/";
 
   return (
     <nav
@@ -22,7 +26,7 @@ export function BottomNav() {
       <div className="mx-auto max-w-md px-4">
         <div className="flex items-center justify-between gap-1 rounded-full border border-[#e1e8f0] bg-white px-2 py-2 shadow-elevated">
           {ITEMS.map(({ to, label, Icon, exact }) => {
-            const active = exact ? pathname === to : pathname.startsWith(to);
+            const active = exact ? activePathname === to : activePathname.startsWith(to);
             return (
               <Link
                 key={to}
@@ -33,7 +37,7 @@ export function BottomNav() {
               >
                 <span
                   className={`relative grid h-10 w-10 place-items-center rounded-full transition-all ${
-                    active ? "bg-brand-ink text-primary-foreground shadow-glow" : ""
+                    active ? "bg-[#06295f] text-white shadow-glow" : ""
                   }`}
                 >
                   <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />
