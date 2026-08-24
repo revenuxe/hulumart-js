@@ -9,6 +9,10 @@ WITH starter_categories(slug) AS (
   FROM public.products p
   JOIN public.categories c ON c.id = p.category_id
   JOIN starter_categories sc ON sc.slug = c.slug
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.inventory_movements im
+    WHERE im.product_id = p.id
+  )
 )
 DELETE FROM public.product_addon_links
 WHERE product_id IN (SELECT id FROM starter_products);
@@ -17,13 +21,19 @@ DELETE FROM public.products
 WHERE category_id IN (
   SELECT id FROM public.categories
   WHERE slug IN ('smartphones', 'laptops', 'tablets', 'audio', 'wearables', 'gaming')
+)
+AND NOT EXISTS (
+  SELECT 1 FROM public.inventory_movements im
+  WHERE im.product_id = products.id
 );
 DELETE FROM public.subcategories
 WHERE category_id IN (
   SELECT id FROM public.categories
   WHERE slug IN ('smartphones', 'laptops', 'tablets', 'audio', 'wearables', 'gaming')
+    AND NOT EXISTS (SELECT 1 FROM public.products p WHERE p.category_id = categories.id)
 );
 DELETE FROM public.categories
-WHERE slug IN ('smartphones', 'laptops', 'tablets', 'audio', 'wearables', 'gaming');
+WHERE slug IN ('smartphones', 'laptops', 'tablets', 'audio', 'wearables', 'gaming')
+  AND NOT EXISTS (SELECT 1 FROM public.products p WHERE p.category_id = categories.id);
 DELETE FROM public.homepage_hero_slides
 WHERE action_url IN ('/categories/smartphones', '/categories/laptops', '/categories');

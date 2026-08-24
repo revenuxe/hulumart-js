@@ -42,7 +42,7 @@ export function CategoryCard({
         className="absolute inset-x-0 bottom-0 h-[38%] opacity-[0.10] [background-image:repeating-linear-gradient(155deg,transparent_0,transparent_16px,rgba(255,255,255,.75)_17px,transparent_18px)]"
       />
       <div className="absolute inset-x-0 bottom-0 z-10 p-4 text-white md:p-5">
-        <h3 className="line-clamp-2 break-words font-display text-[1.4rem] font-black leading-none tracking-tight drop-shadow-sm sm:text-[1.65rem] md:text-3xl">
+        <h3 className="truncate font-display text-[1.2rem] font-black leading-none tracking-tight drop-shadow-sm sm:text-[1.35rem] md:text-xl">
           {name}
         </h3>
       </div>
