@@ -300,12 +300,22 @@ export default function ProductsPage() {
                           )}
                         </td>
                         <td className="px-3 py-2">
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex w-40 items-center gap-1 overflow-hidden">
                             {r.tags.slice(0, 2).map((t) => (
-                              <span key={t} className="rounded-full bg-muted px-1.5 py-0.5 text-[10px]">
+                              <span
+                                key={t}
+                                title={t}
+                                className="max-w-24 truncate whitespace-nowrap rounded-full bg-muted px-1.5 py-0.5 text-[10px]"
+                              >
                                 #{t}
                               </span>
                             ))}
+                            {r.tags.length > 2 && (
+                              <span className="shrink-0 text-[10px] font-medium text-muted-foreground">
+                                +{r.tags.length - 2}
+                              </span>
+                            )}
+                            {r.tags.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
                           </div>
                         </td>
                         <td className="px-3 py-2">

@@ -9,6 +9,8 @@ import {
   CalendarClock,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CircleHelp,
   CreditCard,
   Cpu,
@@ -58,7 +60,10 @@ export function ServiceDetailView({
 }) {
   const router = useRouter();
   const [signInOpen, setSignInOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { addItem } = useCart();
+  const productImages = service.images.length > 0 ? service.images : ["/placeholder.svg"];
+  const selectedImage = productImages[selectedImageIndex] ?? productImages[0];
   const availableStock = Math.max(
     0,
     (service.stockQuantity ?? 1) - (service.reservedQuantity ?? 0),
@@ -104,22 +109,70 @@ export function ServiceDetailView({
       <TopBar />
       <main className="mx-auto w-full max-w-6xl px-5 py-6 md:px-8 md:py-10">
         <div className="grid gap-4 md:gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(22rem,.92fr)] lg:gap-12">
-          <div className="grid grid-cols-2 gap-3">
-            {service.images.slice(0, 4).map((image, index) => (
-              <div
-                key={image}
-                className={`relative overflow-hidden rounded-3xl bg-muted ${index === 0 ? "col-span-2 aspect-[4/3]" : "aspect-square"}`}
-              >
-                <Image
-                  src={image}
-                  alt={`${service.name} view ${index + 1}`}
-                  fill
-                  priority={index === 0}
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="object-cover"
-                />
-              </div>
-            ))}
+          <div className="relative overflow-hidden rounded-[2rem] bg-muted shadow-card">
+            <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[5/4]">
+              <Image
+                src={selectedImage}
+                alt={`${service.name} view ${selectedImageIndex + 1}`}
+                fill
+                priority
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-contain"
+              />
+            </div>
+
+            {productImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous product image"
+                  onClick={() =>
+                    setSelectedImageIndex((current) =>
+                      current === 0 ? productImages.length - 1 : current - 1,
+                    )
+                  }
+                  className="absolute left-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-background/85 text-primary shadow-sm backdrop-blur transition hover:bg-background"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next product image"
+                  onClick={() =>
+                    setSelectedImageIndex((current) =>
+                      current === productImages.length - 1 ? 0 : current + 1,
+                    )
+                  }
+                  className="absolute bottom-3 left-1/2 grid h-9 w-9 -translate-x-1/2 place-items-center rounded-full bg-background/85 text-primary shadow-sm backdrop-blur transition hover:bg-background sm:hidden"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <div className="absolute right-3 top-3 flex max-h-[calc(100%-1.5rem)] flex-col gap-2 overflow-y-auto rounded-[1.35rem] bg-background/85 p-1.5 shadow-sm backdrop-blur">
+                  {productImages.map((image, index) => (
+                    <button
+                      type="button"
+                      key={`${image}-${index}`}
+                      aria-label={`Show product image ${index + 1}`}
+                      aria-pressed={selectedImageIndex === index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border-2 transition sm:h-14 sm:w-14 ${
+                        selectedImageIndex === index
+                          ? "border-primary ring-2 ring-primary/20"
+                          : "border-transparent opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      <Image
+                        src={image}
+                        alt=""
+                        fill
+                        sizes="56px"
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
           <section className="self-start rounded-3xl border border-border bg-card p-5 shadow-card md:p-7 lg:sticky lg:top-28">
             <p className="text-xs font-semibold text-muted-foreground">
@@ -178,6 +231,29 @@ export function ServiceDetailView({
             </p>
           </section>
         </div>
+        {Object.keys(service.specifications ?? {}).length > 0 && (
+          <section className="mt-8 rounded-3xl border border-border bg-card p-5 md:p-7">
+            <h2 className="flex items-center gap-2 font-display text-xl text-primary">
+              <Cpu className="h-4 w-4 text-accent" />
+              Configuration
+            </h2>
+            <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+              {Object.entries(service.specifications ?? {}).map(
+                ([label, value]) => (
+                  <div
+                    key={label}
+                    className="flex items-start justify-between gap-4 rounded-xl bg-muted/50 px-4 py-3 text-sm"
+                  >
+                    <dt className="text-muted-foreground">{label}</dt>
+                    <dd className="text-right font-semibold text-primary">
+                      {value}
+                    </dd>
+                  </div>
+                ),
+              )}
+            </dl>
+          </section>
+        )}
         <section className="mt-8 grid gap-6">
           <aside className="rounded-3xl border border-border bg-card p-5 md:p-7">
             <p className="text-[11px] font-bold uppercase tracking-widest text-accent">
@@ -256,29 +332,6 @@ export function ServiceDetailView({
             </p>
           </article>
         </section>
-        {Object.keys(service.specifications ?? {}).length > 0 && (
-          <section className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-7">
-            <h2 className="flex items-center gap-2 font-display text-xl text-primary">
-              <Cpu className="h-4 w-4 text-accent" />
-              Configuration
-            </h2>
-            <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-              {Object.entries(service.specifications ?? {}).map(
-                ([label, value]) => (
-                  <div
-                    key={label}
-                    className="flex items-start justify-between gap-4 rounded-xl bg-muted/50 px-4 py-3 text-sm"
-                  >
-                    <dt className="text-muted-foreground">{label}</dt>
-                    <dd className="text-right font-semibold text-primary">
-                      {value}
-                    </dd>
-                  </div>
-                ),
-              )}
-            </dl>
-          </section>
-        )}
         {service.included.length > 0 && (
           <section className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-7">
             <h2 className="flex items-center gap-2 font-display text-xl text-primary">
