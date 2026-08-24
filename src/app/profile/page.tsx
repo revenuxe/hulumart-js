@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutRow } from "./sign-out-row";
 import { EditProfileButton } from "./edit-profile-button";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -37,6 +38,12 @@ export default async function ProfilePage() {
           >
             Sign in / Create account
           </Link>
+          <div className="my-5 flex items-center gap-3 text-xs font-medium text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            <span>OR</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+          <GoogleSignInButton redirectTo="/profile" label="Continue with Google" />
         </main>
         <BottomNav />
       </div>

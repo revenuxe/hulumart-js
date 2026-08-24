@@ -26,7 +26,11 @@ export function BottomNav() {
       <div className="mx-auto max-w-md px-4">
         <div className="flex items-center justify-between gap-1 rounded-full border border-[#e1e8f0] bg-white px-2 py-2 shadow-elevated">
           {ITEMS.map(({ to, label, Icon, exact }) => {
-            const active = exact ? activePathname === to : activePathname.startsWith(to);
+            // Home covers the root plus public marketing pages. The other
+            // tabs own their route trees and take precedence when matched.
+            const active = exact
+              ? !["/categories", "/cart", "/profile"].some((route) => activePathname === route || activePathname.startsWith(`${route}/`))
+              : activePathname === to || activePathname.startsWith(`${to}/`);
             return (
               <Link
                 key={to}
