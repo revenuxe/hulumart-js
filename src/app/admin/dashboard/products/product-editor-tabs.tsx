@@ -442,7 +442,6 @@ export function ProductEditorTabs({
       slug: productSlug,
       category_id: categoryId,
       subcategory_id: subcategoryId || null,
-      product_type_id: String(form.get("product_type_id") ?? "") || null,
       brand: String(form.get("brand") ?? "").trim() || null,
       model: String(form.get("model") ?? "").trim() || null,
       sku: String(form.get("sku") ?? "").trim() || null,
@@ -491,6 +490,11 @@ export function ProductEditorTabs({
           .filter(([key, value]) => key && value),
       ),
     });
+    const selectedProductTypeId = String(form.get("product_type_id") ?? "");
+    // Keep product type fully optional. Omitting the field also lets regular
+    // product saves work while a hosted API schema cache is refreshing.
+    if (selectedProductTypeId)
+      Object.assign(payload, { product_type_id: selectedProductTypeId });
     if (!productName || !categoryId || !payload.price) {
       setSaving(false);
       setTab("product");
