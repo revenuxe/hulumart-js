@@ -49,6 +49,7 @@ export type CatalogProduct = {
   discountPct: number;
   rating: number;
   reviewCount: number;
+  specifications?: Record<string, string>;
   included: string[];
   notIncluded: string[];
   faqs: ProductFaq[];
