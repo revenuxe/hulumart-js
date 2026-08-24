@@ -35,6 +35,7 @@ export default async function CompleteProfilePage({
     <CompleteProfileForm
       redirectTo={redirectTo}
       initialName={profile?.full_name ?? user.user_metadata.full_name ?? user.user_metadata.name ?? ""}
+      initialPhone={profile?.phone ?? user.user_metadata.phone ?? ""}
     />
   );
 }

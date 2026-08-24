@@ -8,14 +8,16 @@ import { createClient } from "@/lib/supabase/client";
 export function CompleteProfileForm({
   redirectTo,
   initialName,
+  initialPhone,
 }: {
   redirectTo: string;
   initialName: string;
+  initialPhone: string;
 }) {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
   const [name, setName] = useState(initialName);
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(initialPhone.replace(/\D/g, "").slice(0, 10));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

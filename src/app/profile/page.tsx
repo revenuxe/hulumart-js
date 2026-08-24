@@ -62,13 +62,14 @@ export default async function ProfilePage() {
     {
       icon: MapPin,
       label: "Addresses",
-      meta: addresses ? `${addresses} saved` : "Add a venue address",
+      meta: addresses ? `${addresses} saved` : "Add a delivery address",
       href: "/profile/addresses",
     },
     { icon: Bell, label: "Notifications", meta: "On" },
     { icon: Gift, label: "Refer & earn", meta: "₹100 credit" },
     { icon: HelpCircle, label: "Help & support" },
   ];
+  const visibleRows = rows.filter((row) => row.label !== "Refer & earn");
 
   return (
     <div className="min-h-dvh bg-background">
@@ -91,7 +92,7 @@ export default async function ProfilePage() {
             {[
               [String(addresses ?? 0), "Addresses"],
               ["₹100", "Credits"],
-            ].map(([v, l]) => (
+            ].filter(([, label]) => label !== "Credits").map(([v, l]) => (
               <div key={l} className="glass-dark rounded-2xl px-2 py-2">
                 <p className="text-sm font-bold">{v}</p>
                 <p className="text-[10px] opacity-80">{l}</p>
@@ -101,7 +102,7 @@ export default async function ProfilePage() {
         </div>
 
         <div className="mt-5 divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-card">
-          {rows.map(({ icon: Icon, label, meta, href }) =>
+          {visibleRows.map(({ icon: Icon, label, meta, href }) =>
             href ? (
               <Link
                 key={label}

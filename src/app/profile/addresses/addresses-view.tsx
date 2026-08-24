@@ -25,11 +25,13 @@ const emptyForm = {
 export function AddressesView({
   userId,
   initialRows,
+  defaultPhone,
   returnTo,
   editId,
 }: {
   userId: string;
   initialRows: AddressRow[];
+  defaultPhone: string;
   returnTo?: "/checkout";
   editId?: string;
 }) {
@@ -74,7 +76,7 @@ export function AddressesView({
   }
 
   function startNew() {
-    setForm({ ...emptyForm, is_default: rows.length === 0 });
+    setForm({ ...emptyForm, phone: defaultPhone.replace(/\D/g, "").slice(0, 10), is_default: rows.length === 0 });
     setEditingId("new");
   }
 

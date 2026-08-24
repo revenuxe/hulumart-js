@@ -21,7 +21,7 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
   const [info, setInfo] = useState<string | null>(null);
 
   function afterSignedIn() {
-    router.push(redirectTo);
+    router.push(`/auth/complete-profile?redirect=${encodeURIComponent(redirectTo)}`);
     // The server already rendered with the pre-sign-in session (or none).
     // Without this, Server Components on the destination route can serve
     // a stale, cached payload that doesn't reflect the new session yet.

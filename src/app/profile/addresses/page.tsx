@@ -13,12 +13,15 @@ export default async function AddressesPage({ searchParams }: { searchParams: Pr
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth?redirect=%2Fprofile%2Faddresses");
 
-  const { data } = await supabase
-    .from("addresses")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("is_default", { ascending: false })
-    .order("created_at", { ascending: false });
+  const [{ data: addresses }, { data: profile }] = await Promise.all([
+    supabase
+      .from("addresses")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("is_default", { ascending: false })
+      .order("created_at", { ascending: false }),
+    supabase.from("profiles").select("phone").eq("id", user.id).maybeSingle(),
+  ]);
 
-  return <AddressesView userId={user.id} initialRows={(data ?? []) as AddressRow[]} returnTo={returnTo === "/checkout" ? "/checkout" : undefined} editId={edit} />;
+  return <AddressesView userId={user.id} initialRows={(addresses ?? []) as AddressRow[]} defaultPhone={profile?.phone ?? ""} returnTo={returnTo === "/checkout" ? "/checkout" : undefined} editId={edit} />;
 }
