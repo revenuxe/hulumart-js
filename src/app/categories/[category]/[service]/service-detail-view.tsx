@@ -141,18 +141,6 @@ export function ServiceDetailView({
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
-                <button
-                  type="button"
-                  aria-label="Next product image"
-                  onClick={() =>
-                    setSelectedImageIndex((current) =>
-                      current === productImages.length - 1 ? 0 : current + 1,
-                    )
-                  }
-                  className="absolute bottom-3 left-1/2 grid h-9 w-9 -translate-x-1/2 place-items-center rounded-full bg-background/85 text-primary shadow-sm backdrop-blur transition hover:bg-background sm:hidden"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
                 <div className="absolute right-3 top-3 flex max-h-[calc(100%-1.5rem)] flex-col gap-2 overflow-y-auto rounded-[1.35rem] bg-background/85 p-1.5 shadow-sm backdrop-blur">
                   {productImages.map((image, index) => (
                     <button
