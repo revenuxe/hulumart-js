@@ -15,7 +15,13 @@ export async function GET(request: Request) {
   cookieStore.delete("baraabar_oauth_redirect");
   // Only ever redirect to a local path — see the same guard in
   // src/app/auth/page.tsx for why.
-  const redirectTo = rawRedirect?.startsWith("/") ? rawRedirect : "/";
+  let requestedRedirect = "";
+  try {
+    requestedRedirect = rawRedirect ? decodeURIComponent(rawRedirect) : "";
+  } catch {
+    requestedRedirect = "";
+  }
+  const redirectTo = requestedRedirect.startsWith("/") && !requestedRedirect.startsWith("//") ? requestedRedirect : "/";
 
   if (code) {
     const supabase = await createClient();

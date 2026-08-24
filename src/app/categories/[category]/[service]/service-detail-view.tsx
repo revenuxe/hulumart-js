@@ -1,13 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import { CalendarClock, Check, ChevronDown, CircleHelp, CreditCard, PackageCheck, ShoppingBag, Truck, X } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { ServiceCard } from "@/components/ServiceCard";
 import { useCart } from "@/lib/cart-store";
+import { createClient } from "@/lib/supabase/client";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { DecorCategory, DecorService } from "@/data/types";
 
 const conditionLabels = { like_new: "Like new", excellent: "Excellent", good: "Good", fair: "Fair" };
@@ -22,12 +27,24 @@ function ageLabel(months?: number) {
 
 export function ServiceDetailView({ service, category, related }: { service: DecorService; category: DecorCategory; related: DecorService[] }) {
   const router = useRouter();
+  const [signInOpen, setSignInOpen] = useState(false);
   const { addItem } = useCart();
   const availableStock = Math.max(0, (service.stockQuantity ?? 1) - (service.reservedQuantity ?? 0));
   const soldOut = availableStock === 0;
   const warranty = service.warrantyStatus && service.warrantyStatus !== "none" ? `${service.warrantyProvider ? `${service.warrantyProvider} · ` : ""}${service.warrantyCoverage ?? "Warranty available"}` : "No warranty included";
   const addToCart = () => { if (soldOut) return toast.error("This item is sold out"); addItem({ id: service.id, productId: service.id, categorySlug: service.categorySlug, categoryName: category.name, serviceSlug: service.slug, serviceName: service.name, image: service.images[0] ?? "/placeholder.svg", unitPrice: service.priceDiscounted, originalPrice: service.priceOriginal }); toast.success(`${service.name} added to cart`); };
-  const buyNow = () => { addToCart(); if (!soldOut) router.push("/checkout"); };
+  const buyNow = async () => {
+    if (soldOut) return;
+    addToCart();
+
+    const { data: { user }, error } = await createClient().auth.getUser();
+    if (error || !user) {
+      setSignInOpen(true);
+      return;
+    }
+
+    router.push("/checkout");
+  };
 
   return <div className="min-h-dvh bg-background pb-24"><TopBar /><main className="mx-auto w-full max-w-6xl px-5 py-6 md:px-8 md:py-10">
     <div className="grid gap-4 md:gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(22rem,.92fr)] lg:gap-12">
@@ -40,5 +57,5 @@ export function ServiceDetailView({ service, category, related }: { service: Dec
     {service.faqs.length > 0 && <section className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-7"><h2 className="flex items-center gap-2 font-display text-xl text-primary"><CircleHelp className="h-4 w-4 text-accent" />Frequently asked questions</h2><div className="mt-4 divide-y divide-border">{service.faqs.map((faq) => <details key={faq.question} className="group py-4 first:pt-0"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold text-primary"><span>{faq.question}</span><ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" /></summary><p className="pr-8 pt-3 text-sm leading-6 text-muted-foreground">{faq.answer}</p></details>)}</div></section>}
     <section className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-7"><h2 className="flex items-center gap-2 font-display text-xl text-primary"><Truck className="h-4 w-4 text-accent" />Delivery & pickup</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{service.deliveryInfo ?? "Choose delivery or self pickup during checkout. We’ll confirm the details after you place your order."}</p><div className="mt-4 flex items-start gap-3 rounded-2xl bg-muted/60 p-4 text-sm text-muted-foreground"><CalendarClock className="mt-0.5 h-5 w-5 shrink-0 text-accent" /><p>Delivery timing and pickup instructions are confirmed after checkout, so you know exactly what to expect before payment or collection.</p></div></section>
     {related.length > 0 && <section className="mt-12"><h2 className="font-display text-2xl text-primary">You may also like</h2><div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">{related.map((item) => <ServiceCard key={item.id} service={item} compact />)}</div></section>}
-  </main><Footer /></div>;
+  </main><Footer /><Dialog open={signInOpen} onOpenChange={setSignInOpen}><DialogContent className="max-w-sm rounded-3xl p-6"><DialogHeader><DialogTitle className="font-display text-2xl text-primary">Sign in to continue</DialogTitle><DialogDescription>Sign in to reserve your item, save your delivery details, and complete checkout.</DialogDescription></DialogHeader><GoogleSignInButton redirectTo="/checkout" label="Continue with Google" /><div className="flex items-center gap-3 text-xs font-medium text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div><Link href="/auth?redirect=%2Fcheckout" className="flex w-full justify-center rounded-full border border-primary px-5 py-3 text-sm font-bold text-primary">Sign in with email</Link></DialogContent></Dialog></div>;
 }

@@ -11,7 +11,7 @@ export default async function CompleteProfilePage({
   searchParams: Promise<{ redirect?: string }>;
 }) {
   const params = await searchParams;
-  const redirectTo = params.redirect?.startsWith("/") ? params.redirect : "/";
+  const redirectTo = params.redirect?.startsWith("/") && !params.redirect.startsWith("//") ? params.redirect : "/";
 
   const supabase = await createClient();
   const {
@@ -32,6 +32,9 @@ export default async function CompleteProfilePage({
   }
 
   return (
-    <CompleteProfileForm redirectTo={redirectTo} initialName={profile?.full_name ?? ""} />
+    <CompleteProfileForm
+      redirectTo={redirectTo}
+      initialName={profile?.full_name ?? user.user_metadata.full_name ?? user.user_metadata.name ?? ""}
+    />
   );
 }

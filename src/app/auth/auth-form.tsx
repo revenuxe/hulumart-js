@@ -7,6 +7,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import logo from "@/assets/hulumart-logo.webp";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 
 export function AuthForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
@@ -151,6 +152,13 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
             {mode === "signin" ? "Sign in" : "Create account"}
           </button>
         </form>
+
+        <div className="my-6 flex items-center gap-3 text-xs font-medium text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          <span>or continue with</span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <GoogleSignInButton redirectTo={redirectTo} />
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {mode === "signin" ? "New here?" : "Already have an account?"}{" "}

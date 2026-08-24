@@ -31,8 +31,7 @@ export function CompleteProfileForm({
 
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: name.trim(), phone: phone.trim() })
-        .eq("id", user.id);
+        .upsert({ id: user.id, full_name: name.trim(), phone: phone.trim() });
       if (error) throw error;
 
       router.push(redirectTo);

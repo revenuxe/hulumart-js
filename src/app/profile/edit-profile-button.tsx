@@ -48,8 +48,7 @@ export function EditProfileButton({
 
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: name.trim() || null, phone: phoneValue.trim() || null })
-        .eq("id", user.id);
+        .upsert({ id: user.id, full_name: name.trim() || null, phone: phoneValue.trim() || null });
       if (error) throw error;
 
       setOpen(false);
