@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { publicSupabaseClient } from "@/lib/supabase/public";
+import { getHomepageHeroActionUrl } from "@/lib/homepage-hero";
 import { cities } from "./cities";
 import type { CatalogCategory, CatalogProduct, CatalogSubcategory, ProductFaq } from "./types";
 
@@ -79,5 +80,5 @@ export type { DecorCategory, DecorService, DecorSubcategory } from "./types";
 export const getHomepageHeroSlides = unstable_cache(async (): Promise<HomepageHeroSlide[]> => {
   const { data, error } = await publicSupabaseClient().from("homepage_hero_slides").select("*").eq("is_active", true).order("sort_order");
   if (error) throw error;
-  return (data ?? []).map((slide) => ({ id: slide.id, desktopImageUrl: slide.desktop_image_url, mobileImageUrl: slide.mobile_image_url, kicker: slide.kicker, title: slide.title, subtitle: slide.subtitle, actionLabel: slide.action_label, actionUrl: slide.action_url }));
+  return (data ?? []).map((slide) => ({ id: slide.id, desktopImageUrl: slide.desktop_image_url, mobileImageUrl: slide.mobile_image_url, kicker: slide.kicker, title: slide.title, subtitle: slide.subtitle, actionLabel: slide.action_label, actionUrl: getHomepageHeroActionUrl(slide.action_url) }));
 }, ["homepage-hero"], { revalidate: 3600, tags: ["homepage-hero"] });
