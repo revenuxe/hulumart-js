@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { TopBar } from "@/components/TopBar";
 import { Hero } from "@/components/Hero";
 import { CategoryStrip } from "@/components/CategoryStrip";
@@ -16,6 +17,12 @@ import {
 
 // Below-the-fold and non-critical for first paint — split into its own
 // chunk instead of the initial homepage bundle.
+
+export const metadata: Metadata = {
+  title: "Buy Quality Used Products in Bangalore | Hulumart",
+  description:
+    "Discover quality pre-owned mobiles, laptops, electronics and more in Bangalore. Shop on Hulumart or visit our store to explore available used products.",
+};
 
 export default async function Home() {
   const [categories, trendingServices, featuredServices, smartphonesCategory, heroSlides] = await Promise.all([
