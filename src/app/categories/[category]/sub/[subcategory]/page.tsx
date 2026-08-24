@@ -6,9 +6,15 @@ import { ArrowLeft } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
+import { CategoryCard } from "@/components/CategoryCard";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/jsonld";
-import { getCategoryBySlug, getServicesByCategory, getSubcategoryBySlug } from "@/data";
+import {
+  getCategoryBySlug,
+  getProductTypesBySubcategory,
+  getServicesByCategory,
+  getSubcategoryBySlug,
+} from "@/data";
 import { SubcategoryProductsSection } from "./subcategory-products-section";
 
 export async function generateMetadata({
@@ -24,16 +30,21 @@ export async function generateMetadata({
   if (!subcategory) return {};
   const title = `Used ${subcategory.name} in Bengaluru`;
   const description =
-    subcategory.tagline || `${subcategory.name} decoration${category ? ` for your ${category.name.toLowerCase()}` : ""}.`;
+    subcategory.tagline ||
+    `${subcategory.name} decoration${category ? ` for your ${category.name.toLowerCase()}` : ""}.`;
   return {
     title,
     description,
-    alternates: { canonical: `/categories/${categorySlug}/sub/${subcategorySlug}` },
+    alternates: {
+      canonical: `/categories/${categorySlug}/sub/${subcategorySlug}`,
+    },
     openGraph: {
       title,
       description,
       url: `/categories/${categorySlug}/sub/${subcategorySlug}`,
-      images: [subcategory.image || category?.heroImage].filter((u): u is string => !!u),
+      images: [subcategory.image || category?.heroImage].filter(
+        (u): u is string => !!u,
+      ),
     },
   };
 }
@@ -50,8 +61,13 @@ export default async function SubcategoryPage({
   ]);
   if (!category || !subcategory) notFound();
 
-  const allServices = await getServicesByCategory(categorySlug);
-  const services = allServices.filter((s) => s.subcategorySlug === subcategorySlug);
+  const [allServices, productTypes] = await Promise.all([
+    getServicesByCategory(categorySlug),
+    getProductTypesBySubcategory(subcategory.id),
+  ]);
+  const services = allServices.filter(
+    (s) => s.subcategorySlug === subcategorySlug,
+  );
   const heroImage = subcategory.image || category.heroImage;
 
   return (
@@ -61,7 +77,10 @@ export default async function SubcategoryPage({
           { name: "Home", path: "/" },
           { name: "Categories", path: "/categories" },
           { name: category.name, path: `/categories/${categorySlug}` },
-          { name: subcategory.name, path: `/categories/${categorySlug}/sub/${subcategorySlug}` },
+          {
+            name: subcategory.name,
+            path: `/categories/${categorySlug}/sub/${subcategorySlug}`,
+          },
         ])}
       />
       {services.length > 0 && <JsonLd data={itemListJsonLd(services)} />}
@@ -94,14 +113,41 @@ export default async function SubcategoryPage({
               >
                 <ArrowLeft className="h-3.5 w-3.5" /> {category.name}
               </Link>
-              <h1 className="font-display text-3xl leading-tight md:text-5xl">{subcategory.name}</h1>
+              <h1 className="font-display text-3xl leading-tight md:text-5xl">
+                {subcategory.name}
+              </h1>
               {subcategory.tagline && (
-                <p className="mt-2 text-sm text-muted-foreground md:text-base">{subcategory.tagline}</p>
+                <p className="mt-2 text-sm text-muted-foreground md:text-base">
+                  {subcategory.tagline}
+                </p>
               )}
             </div>
           </div>
         </section>
 
+        {productTypes.length > 0 && (
+          <section className="mx-auto max-w-6xl px-5 py-8 md:px-8">
+            <h2 className="font-display text-2xl text-primary">Shop by type</h2>
+            <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+              {productTypes.map((item) => (
+                <CategoryCard
+                  key={item.id}
+                  href={
+                    "/categories/" +
+                    categorySlug +
+                    "/sub/" +
+                    subcategorySlug +
+                    "/type/" +
+                    item.slug
+                  }
+                  image={item.image_url ?? undefined}
+                  name={item.name}
+                  tagline={item.tagline ?? undefined}
+                />
+              ))}
+            </div>
+          </section>
+        )}
         <SubcategoryProductsSection services={services} />
       </main>
       <Footer />

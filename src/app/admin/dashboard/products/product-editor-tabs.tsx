@@ -9,6 +9,7 @@ import { GalleryUploadField } from "@/components/admin/GalleryUploadField";
 type Product = Database["public"]["Tables"]["products"]["Row"];
 type Category = { id: string; name: string };
 type Subcategory = { id: string; name: string; category_id: string };
+type ProductType = { id: string; name: string; subcategory_id: string };
 type LibraryItem =
   Database["public"]["Tables"]["product_content_library"]["Row"];
 type Faq = { question: string; answer: string };
@@ -16,6 +17,7 @@ type Props = {
   product: Product | null;
   categories: Category[];
   subcategories: Subcategory[];
+  productTypes: ProductType[];
   library: LibraryItem[];
   defaultCategoryId?: string;
   defaultSubcategoryId?: string;
@@ -307,6 +309,7 @@ export function ProductEditorTabs({
   product,
   categories,
   subcategories,
+  productTypes,
   library,
   defaultCategoryId,
   defaultSubcategoryId,
@@ -324,6 +327,9 @@ export function ProductEditorTabs({
   const [categoryId, setCategoryId] = useState(
     product?.category_id ?? defaultCategoryId ?? "",
   );
+  const [subcategoryId, setSubcategoryId] = useState(
+    product?.subcategory_id ?? defaultSubcategoryId ?? "",
+  );
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [included, setIncluded] = useState(
     (product?.included ?? []).join("\n"),
@@ -340,9 +346,7 @@ export function ProductEditorTabs({
   );
   const [careInfo, setCareInfo] = useState(product?.care_info ?? "");
   const selectedSubcategoryName =
-    subcategories.find(
-      (item) => item.id === (product?.subcategory_id ?? defaultSubcategoryId),
-    )?.name ?? "";
+    subcategories.find((item) => item.id === subcategoryId)?.name ?? "";
   const saveDraft = (form: HTMLFormElement) => {
     const fields = Object.fromEntries(
       Array.from(new FormData(form).entries())
@@ -437,7 +441,8 @@ export function ProductEditorTabs({
       name: productName,
       slug: productSlug,
       category_id: categoryId,
-      subcategory_id: String(form.get("subcategory_id") ?? "") || null,
+      subcategory_id: subcategoryId || null,
+      product_type_id: String(form.get("product_type_id") ?? "") || null,
       brand: String(form.get("brand") ?? "").trim() || null,
       model: String(form.get("model") ?? "").trim() || null,
       sku: String(form.get("sku") ?? "").trim() || null,
@@ -586,14 +591,29 @@ export function ProductEditorTabs({
           <Field label="Subcategory">
             <select
               name="subcategory_id"
-              defaultValue={
-                product?.subcategory_id ?? defaultSubcategoryId ?? ""
-              }
+              value={subcategoryId}
+              onChange={(event) => setSubcategoryId(event.target.value)}
               className={field}
             >
               <option value="">None</option>
               {subcategories
                 .filter((item) => item.category_id === categoryId)
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+            </select>
+          </Field>
+          <Field label="Product type">
+            <select
+              name="product_type_id"
+              defaultValue={product?.product_type_id ?? ""}
+              className={field}
+            >
+              <option value="">None</option>
+              {productTypes
+                .filter((item) => item.subcategory_id === subcategoryId)
                 .map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}

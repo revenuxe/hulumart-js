@@ -17,29 +17,84 @@ import {
 } from "lucide-react";
 
 const NAV = [
-  { href: "/admin/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
-  { href: "/admin/dashboard/inventory", label: "Inventory", icon: Boxes, exact: false },
-  { href: "/admin/dashboard/categories", label: "Listings", icon: Layers, exact: false },
-  { href: "/admin/dashboard/homepage", label: "Homepage", icon: House, exact: false },
-  { href: "/admin/dashboard/users", label: "Users", icon: UsersIcon, exact: false },
-  { href: "/admin/dashboard/sell", label: "Sell Now", icon: HandCoins, exact: false },
+  {
+    href: "/admin/dashboard",
+    label: "Overview",
+    icon: LayoutGrid,
+    exact: true,
+  },
+  {
+    href: "/admin/dashboard/inventory",
+    label: "Inventory",
+    icon: Boxes,
+    exact: false,
+  },
+  {
+    href: "/admin/dashboard/categories",
+    label: "Listings",
+    icon: Layers,
+    exact: false,
+  },
+  {
+    href: "/admin/dashboard/homepage",
+    label: "Homepage",
+    icon: House,
+    exact: false,
+  },
+  {
+    href: "/admin/dashboard/users",
+    label: "Users",
+    icon: UsersIcon,
+    exact: false,
+  },
+  {
+    href: "/admin/dashboard/sell",
+    label: "Sell Now",
+    icon: HandCoins,
+    exact: false,
+  },
 ];
 
-const SELL_TABS = [{ href: "/admin/dashboard/sell", label: "Leads", icon: HandCoins }];
+const SELL_TABS = [
+  { href: "/admin/dashboard/sell", label: "Leads", icon: HandCoins },
+];
 
 const LISTING_TABS = [
   { href: "/admin/dashboard/categories", label: "Categories", icon: Layers },
-  { href: "/admin/dashboard/subcategories", label: "Subcategories", icon: FolderTree },
+  {
+    href: "/admin/dashboard/subcategories",
+    label: "Subcategories",
+    icon: FolderTree,
+  },
+  {
+    href: "/admin/dashboard/product-types",
+    label: "Product types",
+    icon: FolderTree,
+  },
   { href: "/admin/dashboard/products", label: "Used items", icon: Layers },
-  { href: "/admin/dashboard/content-library", label: "Content library", icon: FileText },
+  {
+    href: "/admin/dashboard/content-library",
+    label: "Content library",
+    icon: FileText,
+  },
 ];
 
-const HOMEPAGE_TABS = [{ href: "/admin/dashboard/homepage", label: "Hero carousel", icon: House }];
+const HOMEPAGE_TABS = [
+  { href: "/admin/dashboard/homepage", label: "Hero carousel", icon: House },
+];
 
-export function AdminShell({ email, children }: { email: string; children: React.ReactNode }) {
+export function AdminShell({
+  email,
+  children,
+}: {
+  email: string;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
-  const activeListing = LISTING_TABS.some((tab) => pathname.startsWith(tab.href));
+  const activeListing = LISTING_TABS.some((tab) =>
+    pathname.startsWith(tab.href),
+  );
   const activeHomepage = pathname.startsWith("/admin/dashboard/homepage");
   const activeSell = pathname.startsWith("/admin/dashboard/sell");
 
@@ -66,7 +121,9 @@ export function AdminShell({ email, children }: { email: string; children: React
             </span>
           </Link>
           <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-muted-foreground sm:block">{email}</span>
+            <span className="hidden text-xs text-muted-foreground sm:block">
+              {email}
+            </span>
             <button
               onClick={signOut}
               className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold"
@@ -78,11 +135,16 @@ export function AdminShell({ email, children }: { email: string; children: React
         <nav className="no-scrollbar mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 pb-2">
           {NAV.map((n) => {
             const Icon = n.icon;
-            const active = n.label === "Listings"
-              ? activeListing
-              : n.label === "Homepage"
-                ? activeHomepage
-              : n.label === "Sell Now" ? activeSell : n.exact ? pathname === n.href : pathname.startsWith(n.href);
+            const active =
+              n.label === "Listings"
+                ? activeListing
+                : n.label === "Homepage"
+                  ? activeHomepage
+                  : n.label === "Sell Now"
+                    ? activeSell
+                    : n.exact
+                      ? pathname === n.href
+                      : pathname.startsWith(n.href);
             return (
               <Link
                 key={n.href}
@@ -100,12 +162,31 @@ export function AdminShell({ email, children }: { email: string; children: React
           })}
         </nav>
         {(activeListing || activeHomepage || activeSell) && (
-          <nav aria-label={activeListing ? "Listing sections" : "Homepage sections"} className="border-t border-border/70 bg-muted/30">
+          <nav
+            aria-label={
+              activeListing ? "Listing sections" : "Homepage sections"
+            }
+            className="border-t border-border/70 bg-muted/30"
+          >
             <div className="no-scrollbar mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2">
-              {(activeListing ? LISTING_TABS : activeSell ? SELL_TABS : HOMEPAGE_TABS).map((tab) => {
+              {(activeListing
+                ? LISTING_TABS
+                : activeSell
+                  ? SELL_TABS
+                  : HOMEPAGE_TABS
+              ).map((tab) => {
                 const active = pathname.startsWith(tab.href);
                 const Icon = tab.icon;
-                return <Link key={tab.href} href={tab.href} className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${active ? "bg-card text-primary shadow-sm ring-1 ring-border" : "text-muted-foreground hover:bg-card/70 hover:text-primary"}`}><Icon className="h-3.5 w-3.5" />{tab.label}</Link>;
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${active ? "bg-card text-primary shadow-sm ring-1 ring-border" : "text-muted-foreground hover:bg-card/70 hover:text-primary"}`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {tab.label}
+                  </Link>
+                );
               })}
             </div>
           </nav>

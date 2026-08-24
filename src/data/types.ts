@@ -27,6 +27,7 @@ export type CatalogProduct = {
   slug: string;
   categorySlug: string;
   subcategorySlug?: string;
+  productTypeId?: string;
   name: string;
   tagline: string;
   description: string;

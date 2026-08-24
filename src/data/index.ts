@@ -76,6 +76,7 @@ const getCatalog = unstable_cache(
         slug: row.slug,
         categorySlug: row.categories?.slug ?? "",
         subcategorySlug: row.subcategories?.slug ?? undefined,
+        productTypeId: row.product_type_id ?? undefined,
         name: row.name,
         tagline: row.tagline ?? "",
         description: row.description ?? "",
@@ -166,6 +167,17 @@ export async function getSubcategoryBySlug(
     (item) =>
       item.categorySlug === categorySlug && item.slug === subcategorySlug,
   );
+}
+export async function getProductTypesBySubcategory(subcategoryId: string) {
+  const { data, error } = await publicSupabaseClient()
+    .from("product_types")
+    .select("*")
+    .eq("subcategory_id", subcategoryId)
+    .eq("is_active", true)
+    .order("sort_order")
+    .order("name");
+  if (error) throw error;
+  return data ?? [];
 }
 export async function getServicesByCategory(categorySlug: string) {
   return (await getCatalog()).services.filter(

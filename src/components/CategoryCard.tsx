@@ -45,12 +45,6 @@ export function CategoryCard({
         <h3 className="line-clamp-2 break-words font-display text-[1.4rem] font-black leading-none tracking-tight drop-shadow-sm sm:text-[1.65rem] md:text-3xl">
           {name}
         </h3>
-        <p className="mt-2 truncate text-xs font-medium leading-5 text-white/90 md:text-sm">
-          {tagline ||
-            (name === "Electronics"
-              ? "Used tech you can trust."
-              : "Quality pre-owned finds, made easy.")}
-        </p>
       </div>
     </Link>
   );

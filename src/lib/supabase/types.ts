@@ -856,6 +856,51 @@ export type Database = {
         }
         Relationships: []
       }
+      product_types: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          slug: string
+          sort_order: number
+          subcategory_id: string
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          subcategory_id: string
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          subcategory_id?: string
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           approximate_age_months: number | null
@@ -890,6 +935,7 @@ export type Database = {
           not_included: string[]
           og_image_url: string | null
           price: number
+          product_type_id: string | null
           rating: number
           reserved_quantity: number
           review_count: number
@@ -943,6 +989,7 @@ export type Database = {
           not_included?: string[]
           og_image_url?: string | null
           price: number
+          product_type_id?: string | null
           rating?: number
           reserved_quantity?: number
           review_count?: number
@@ -996,6 +1043,7 @@ export type Database = {
           not_included?: string[]
           og_image_url?: string | null
           price?: number
+          product_type_id?: string | null
           rating?: number
           reserved_quantity?: number
           review_count?: number
