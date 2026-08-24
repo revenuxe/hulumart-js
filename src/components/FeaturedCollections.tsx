@@ -44,7 +44,7 @@ export function FeaturedCollections({
 
       <div ref={cardsRef} className="no-scrollbar -mx-6 flex snap-x-mandatory gap-3 overflow-x-auto scroll-px-6 px-6 pb-2 md:mx-0 md:gap-5 md:scroll-px-0 md:px-0">
         {services.map((s) => (
-          <div key={s.id} className="w-60 shrink-0 snap-start-safe md:w-[calc((100%-3.75rem)/4)]">
+          <div key={s.id} className="w-[calc((100%-0.75rem)/2)] shrink-0 snap-start-safe md:w-[calc((100%-3.75rem)/4)]">
             <ServiceCard service={s} badge={cardBadge} size="md" />
           </div>
         ))}
