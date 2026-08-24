@@ -61,6 +61,7 @@ export function ServiceDetailView({
   const router = useRouter();
   const [signInOpen, setSignInOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const { addItem } = useCart();
   const productImages = service.images.length > 0 ? service.images : ["/placeholder.svg"];
   const selectedImage = productImages[selectedImageIndex] ?? productImages[0];
@@ -110,7 +111,12 @@ export function ServiceDetailView({
       <main className="mx-auto w-full max-w-6xl px-5 py-6 md:px-8 md:py-10">
         <div className="grid gap-4 md:gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(22rem,.92fr)] lg:gap-12">
           <div className="relative overflow-hidden rounded-[2rem] bg-muted shadow-card">
-            <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[5/4]">
+            <button
+              type="button"
+              onClick={() => setImageViewerOpen(true)}
+              aria-label={`View larger image of ${service.name}`}
+              className="relative block aspect-[4/3] w-full cursor-zoom-in overflow-hidden sm:aspect-[5/4]"
+            >
               <Image
                 src={selectedImage}
                 alt={`${service.name} view ${selectedImageIndex + 1}`}
@@ -119,7 +125,7 @@ export function ServiceDetailView({
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 className="object-contain"
               />
-            </div>
+            </button>
 
             {productImages.length > 1 && (
               <>
@@ -420,6 +426,64 @@ export function ServiceDetailView({
         )}
       </main>
       <Footer />
+      <Dialog open={imageViewerOpen} onOpenChange={setImageViewerOpen}>
+        <DialogContent className="max-w-[calc(100%-1rem)] gap-0 overflow-hidden rounded-[2rem] border-0 bg-background p-0 sm:max-w-5xl" aria-describedby={undefined}>
+          <DialogTitle className="sr-only">{service.name} image viewer</DialogTitle>
+          <div className="relative flex min-h-[22rem] items-center justify-center bg-muted/70 p-4 sm:min-h-[34rem] sm:p-8">
+            <Image
+              src={selectedImage}
+              alt={`${service.name} view ${selectedImageIndex + 1}`}
+              fill
+              sizes="(min-width: 640px) 64rem, 100vw"
+              className="object-contain"
+            />
+            {productImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous product image"
+                  onClick={() =>
+                    setSelectedImageIndex((current) =>
+                      current === 0 ? productImages.length - 1 : current - 1,
+                    )
+                  }
+                  className="absolute left-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-background/90 text-primary shadow-sm"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next product image"
+                  onClick={() =>
+                    setSelectedImageIndex((current) =>
+                      current === productImages.length - 1 ? 0 : current + 1,
+                    )
+                  }
+                  className="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-background/90 text-primary shadow-sm"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+                <div className="absolute bottom-3 left-1/2 flex max-w-[calc(100%-2rem)] -translate-x-1/2 gap-1.5 overflow-x-auto rounded-2xl bg-background/85 p-1.5 shadow-sm backdrop-blur">
+                  {productImages.map((image, index) => (
+                    <button
+                      type="button"
+                      key={`viewer-${image}-${index}`}
+                      aria-label={`Show product image ${index + 1}`}
+                      aria-pressed={selectedImageIndex === index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border-2 ${
+                        selectedImageIndex === index ? "border-primary" : "border-transparent opacity-70"
+                      }`}
+                    >
+                      <Image src={image} alt="" fill sizes="44px" className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       <Dialog open={signInOpen} onOpenChange={setSignInOpen}>
         <DialogContent className="max-w-sm rounded-3xl p-6">
           <DialogHeader>
