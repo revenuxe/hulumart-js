@@ -13,6 +13,7 @@ import {
   House,
   Boxes,
   HandCoins,
+  ShoppingBag,
   FileText,
 } from "lucide-react";
 
@@ -45,6 +46,12 @@ const NAV = [
     href: "/admin/dashboard/users",
     label: "Users",
     icon: UsersIcon,
+    exact: false,
+  },
+  {
+    href: "/admin/dashboard/orders",
+    label: "Orders",
+    icon: ShoppingBag,
     exact: false,
   },
   {
