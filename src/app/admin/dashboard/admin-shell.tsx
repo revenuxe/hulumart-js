@@ -25,9 +25,9 @@ const NAV = [
     exact: true,
   },
   {
-    href: "/admin/dashboard/inventory",
-    label: "Inventory",
-    icon: Boxes,
+    href: "/admin/dashboard/orders",
+    label: "Orders",
+    icon: ShoppingBag,
     exact: false,
   },
   {
@@ -49,9 +49,9 @@ const NAV = [
     exact: false,
   },
   {
-    href: "/admin/dashboard/orders",
-    label: "Orders",
-    icon: ShoppingBag,
+    href: "/admin/dashboard/inventory",
+    label: "Inventory",
+    icon: Boxes,
     exact: false,
   },
   {
