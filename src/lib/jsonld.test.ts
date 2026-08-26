@@ -43,4 +43,34 @@ describe("productJsonLd", () => {
       },
     });
   });
+
+  it("includes configured shipping and return details in the offer", () => {
+    const jsonLd = productJsonLd(
+      {
+        ...service,
+        shippingPrice: 0,
+        shippingMinDays: 2,
+        shippingMaxDays: 5,
+        returnPolicy: "finite",
+        returnWindowDays: 7,
+        returnFees: "free",
+      },
+      "Smartphones",
+    );
+
+    expect(jsonLd.offers).toMatchObject({
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: { value: 0, currency: "INR" },
+        shippingDestination: { addressCountry: "IN" },
+        deliveryTime: { transitTime: { minValue: 2, maxValue: 5 } },
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "IN",
+        merchantReturnDays: 7,
+        returnFees: "https://schema.org/FreeReturn",
+      },
+    });
+  });
 });

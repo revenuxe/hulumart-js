@@ -125,6 +125,62 @@ export function productJsonLd(service: DecorService, categoryName: string) {
         name: SITE_NAME,
       },
       areaServed: "Bengaluru",
+      ...(service.shippingPrice != null
+        ? {
+            shippingDetails: {
+              "@type": "OfferShippingDetails",
+              shippingRate: {
+                "@type": "MonetaryAmount",
+                value: service.shippingPrice,
+                currency: "INR",
+              },
+              shippingDestination: {
+                "@type": "DefinedRegion",
+                addressCountry: "IN",
+              },
+              ...(service.shippingMinDays != null &&
+              service.shippingMaxDays != null
+                ? {
+                    deliveryTime: {
+                      "@type": "ShippingDeliveryTime",
+                      transitTime: {
+                        "@type": "QuantitativeValue",
+                        minValue: service.shippingMinDays,
+                        maxValue: service.shippingMaxDays,
+                        unitCode: "DAY",
+                      },
+                    },
+                  }
+                : {}),
+            },
+          }
+        : {}),
+      ...(service.returnPolicy === "not_permitted"
+        ? {
+            hasMerchantReturnPolicy: {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "IN",
+              returnPolicyCategory:
+                "https://schema.org/MerchantReturnNotPermitted",
+            },
+          }
+        : service.returnPolicy === "finite" &&
+            service.returnWindowDays != null &&
+            service.returnFees
+          ? {
+              hasMerchantReturnPolicy: {
+                "@type": "MerchantReturnPolicy",
+                applicableCountry: "IN",
+                returnPolicyCategory:
+                  "https://schema.org/MerchantReturnFiniteReturnWindow",
+                merchantReturnDays: service.returnWindowDays,
+                returnFees:
+                  service.returnFees === "free"
+                    ? "https://schema.org/FreeReturn"
+                    : "https://schema.org/ReturnShippingFees",
+              },
+            }
+          : {}),
     },
     ...(service.conditionGrade ? { itemCondition: "https://schema.org/UsedCondition" } : {}),
     ...(service.reviewCount > 0

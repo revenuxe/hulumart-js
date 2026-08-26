@@ -55,6 +55,12 @@ export type CatalogProduct = {
   notIncluded: string[];
   faqs: ProductFaq[];
   deliveryInfo?: string;
+  shippingPrice?: number;
+  shippingMinDays?: number;
+  shippingMaxDays?: number;
+  returnPolicy?: "not_permitted" | "finite";
+  returnWindowDays?: number;
+  returnFees?: "free" | "customer_pays";
   careInfo?: string;
   tags: string[];
   sortOrder: number;

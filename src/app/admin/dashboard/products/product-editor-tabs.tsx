@@ -462,6 +462,18 @@ export function ProductEditorTabs({
       not_included: list(notIncluded),
       faqs: faqs.filter((faq) => faq.question.trim() && faq.answer.trim()),
       delivery_info: deliveryInfo.trim() || null,
+      shipping_price:
+        form.get("shipping_price") === ""
+          ? null
+          : Math.max(0, Number(form.get("shipping_price") || 0)),
+      shipping_min_days:
+        Number(form.get("shipping_min_days") || 0) || null,
+      shipping_max_days:
+        Number(form.get("shipping_max_days") || 0) || null,
+      return_policy: String(form.get("return_policy") ?? "") || null,
+      return_window_days:
+        Number(form.get("return_window_days") || 0) || null,
+      return_fees: String(form.get("return_fees") ?? "") || null,
       care_info: careInfo.trim() || null,
       warranty_status: String(
         form.get("warranty_status") ?? "none",
@@ -506,6 +518,27 @@ export function ProductEditorTabs({
       return setMessage(
         "Sale price must be lower than the list price. Swap the two amounts if they were entered in reverse.",
       );
+    }
+    if (
+      (payload.shipping_min_days == null) !==
+        (payload.shipping_max_days == null) ||
+      (payload.shipping_min_days != null &&
+        payload.shipping_max_days != null &&
+        payload.shipping_min_days > payload.shipping_max_days)
+    ) {
+      setSaving(false);
+      setTab("content");
+      return setMessage(
+        "Enter both delivery estimates, with the minimum no greater than the maximum.",
+      );
+    }
+    if (
+      payload.return_policy === "finite" &&
+      (!payload.return_window_days || !payload.return_fees)
+    ) {
+      setSaving(false);
+      setTab("content");
+      return setMessage("Set a return window and return fee for returnable products.");
     }
     const supabase = createClient();
     const result = product
@@ -876,6 +909,75 @@ export function ProductEditorTabs({
               defaultValue={product?.warranty_coverage ?? ""}
               className={field}
             />
+          </Field>
+        </div>
+        <div className="grid gap-4 rounded-3xl border border-border bg-card p-5 md:grid-cols-2">
+          <div className="md:col-span-2">
+            <h3 className="font-display text-xl">Shipping & returns for Google</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              These details appear in this product&apos;s structured data. Enter only
+              the policy that genuinely applies to this listing.
+            </p>
+          </div>
+          <Field label="Shipping fee (â‚¹)">
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="shipping_price"
+              defaultValue={product?.shipping_price ?? ""}
+              placeholder="e.g. 0 for free shipping"
+              className={field}
+            />
+          </Field>
+          <Field label="Delivery estimate: minimum days">
+            <input
+              type="number"
+              min="0"
+              name="shipping_min_days"
+              defaultValue={product?.shipping_min_days ?? ""}
+              className={field}
+            />
+          </Field>
+          <Field label="Delivery estimate: maximum days">
+            <input
+              type="number"
+              min="0"
+              name="shipping_max_days"
+              defaultValue={product?.shipping_max_days ?? ""}
+              className={field}
+            />
+          </Field>
+          <Field label="Return policy">
+            <select
+              name="return_policy"
+              defaultValue={product?.return_policy ?? ""}
+              className={field}
+            >
+              <option value="">Not configured</option>
+              <option value="not_permitted">Returns not accepted</option>
+              <option value="finite">Returns accepted within a set window</option>
+            </select>
+          </Field>
+          <Field label="Return window (days)">
+            <input
+              type="number"
+              min="1"
+              name="return_window_days"
+              defaultValue={product?.return_window_days ?? ""}
+              className={field}
+            />
+          </Field>
+          <Field label="Return fee">
+            <select
+              name="return_fees"
+              defaultValue={product?.return_fees ?? ""}
+              className={field}
+            >
+              <option value="">Not configured</option>
+              <option value="free">Free return</option>
+              <option value="customer_pays">Customer pays return shipping</option>
+            </select>
           </Field>
         </div>
       </Panel>

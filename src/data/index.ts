@@ -125,6 +125,18 @@ const getCatalog = unstable_cache(
             typeof faq?.answer === "string",
         ),
         deliveryInfo: row.delivery_info ?? undefined,
+        shippingPrice: row.shipping_price ?? undefined,
+        shippingMinDays: row.shipping_min_days ?? undefined,
+        shippingMaxDays: row.shipping_max_days ?? undefined,
+        returnPolicy:
+          row.return_policy === "not_permitted" || row.return_policy === "finite"
+            ? row.return_policy
+            : undefined,
+        returnWindowDays: row.return_window_days ?? undefined,
+        returnFees:
+          row.return_fees === "free" || row.return_fees === "customer_pays"
+            ? row.return_fees
+            : undefined,
         careInfo: row.care_info ?? undefined,
         tags: row.tags ?? [],
         sortOrder: row.sort_order,

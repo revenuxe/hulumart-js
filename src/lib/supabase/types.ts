@@ -916,6 +916,9 @@ export type Database = {
           created_at: string
           delivery_group_id: string | null
           delivery_info: string | null
+          return_fees: string | null
+          return_policy: string | null
+          return_window_days: number | null
           description: string | null
           faq_group_id: string | null
           faqs: Json
@@ -940,6 +943,9 @@ export type Database = {
           reserved_quantity: number
           review_count: number
           sale_price: number | null
+          shipping_max_days: number | null
+          shipping_min_days: number | null
+          shipping_price: number | null
           sku: string | null
           slug: string
           sort_order: number
@@ -970,6 +976,9 @@ export type Database = {
           created_at?: string
           delivery_group_id?: string | null
           delivery_info?: string | null
+          return_fees?: string | null
+          return_policy?: string | null
+          return_window_days?: number | null
           description?: string | null
           faq_group_id?: string | null
           faqs?: Json
@@ -994,6 +1003,9 @@ export type Database = {
           reserved_quantity?: number
           review_count?: number
           sale_price?: number | null
+          shipping_max_days?: number | null
+          shipping_min_days?: number | null
+          shipping_price?: number | null
           sku?: string | null
           slug: string
           sort_order?: number
@@ -1024,6 +1036,9 @@ export type Database = {
           created_at?: string
           delivery_group_id?: string | null
           delivery_info?: string | null
+          return_fees?: string | null
+          return_policy?: string | null
+          return_window_days?: number | null
           description?: string | null
           faq_group_id?: string | null
           faqs?: Json
@@ -1048,6 +1063,9 @@ export type Database = {
           reserved_quantity?: number
           review_count?: number
           sale_price?: number | null
+          shipping_max_days?: number | null
+          shipping_min_days?: number | null
+          shipping_price?: number | null
           sku?: string | null
           slug?: string
           sort_order?: number
