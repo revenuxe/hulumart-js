@@ -2,7 +2,24 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+Before starting the development server, copy `.env.example` to `.env.local`
+in the project root (next to `package.json`). In PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in
+`.env.local` to your Supabase project's URL and public anon key. The template
+includes a project URL but leaves the key empty. Next.js does not load
+`.env.example`, and the catalog requires both values to connect to Supabase.
+Keep `SUPABASE_SERVICE_ROLE_KEY` server-only; do not use it as the public key.
+The remaining variables in the template configure admin access and image storage.
+
+Restart the development server after changing `.env.local`. For deployments,
+configure the environment variables in your hosting environment before building.
+
+Then run the development server:
 
 ```bash
 npm run dev

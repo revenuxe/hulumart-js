@@ -1,5 +1,8 @@
 "use client";
 
+import { productUrl } from "@/lib/product-url";
+
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -109,7 +112,7 @@ export function CategoriesMegaMenu() {
                   {currentTopSellers.map((p) => (
                     <Link
                       key={p.slug}
-                      href={`/categories/${current}/${p.slug}`}
+                      href={productUrl(p)}
                       onClick={() => setOpen(false)}
                       className="group block"
                     >

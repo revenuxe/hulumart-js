@@ -1,3 +1,4 @@
+import { productUrl } from "@/lib/product-url";
 import { CONTACT, CONTACT_MAPS_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 import type { DecorService } from "@/data/types";
 
@@ -84,13 +85,13 @@ export function itemListJsonLd(services: DecorService[]) {
     itemListElement: services.map((s, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${SITE_URL}/categories/${s.categorySlug}/${s.slug}`,
+      url: `${SITE_URL}${productUrl(s)}`,
     })),
   };
 }
 
 export function productJsonLd(service: DecorService, categoryName: string) {
-  const url = `${SITE_URL}/categories/${service.categorySlug}/${service.slug}`;
+  const url = `${SITE_URL}${productUrl(service)}`;
 
   return {
     "@context": "https://schema.org",

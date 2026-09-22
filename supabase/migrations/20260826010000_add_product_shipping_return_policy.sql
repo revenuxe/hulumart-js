@@ -16,3 +16,6 @@ ALTER TABLE public.products
     (return_policy = 'not_permitted' AND return_window_days IS NULL AND return_fees IS NULL) OR
     (return_policy = 'finite' AND return_window_days IS NOT NULL AND return_fees IS NOT NULL)
   );
+
+-- Make the new columns available to the API immediately after the migration.
+NOTIFY pgrst, 'reload schema';

@@ -27,3 +27,6 @@ CREATE TRIGGER trg_product_types_updated BEFORE UPDATE ON public.product_types F
 ALTER TABLE public.products
   ADD COLUMN product_type_id UUID REFERENCES public.product_types(id) ON DELETE SET NULL;
 CREATE INDEX idx_products_product_type ON public.products (product_type_id) WHERE product_type_id IS NOT NULL;
+
+-- Expose the new table and product relationship to the API after migration.
+NOTIFY pgrst, 'reload schema';

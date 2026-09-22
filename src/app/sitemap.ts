@@ -1,3 +1,4 @@
+import { productUrl } from "@/lib/product-url";
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 import { getCategories, getAllSubcategories, getAllServices } from "@/data";
@@ -53,7 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const productPages = services.map((s) => ({
-    url: `${SITE_URL}/categories/${s.categorySlug}/${s.slug}`,
+    url: `${SITE_URL}${productUrl(s)}`,
     lastModified: new Date(s.updatedAt),
     changeFrequency: "weekly" as const,
     priority: 0.9,

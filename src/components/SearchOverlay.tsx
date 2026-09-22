@@ -1,5 +1,8 @@
 "use client";
 
+import { productUrl } from "@/lib/product-url";
+
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Dialog as DialogPrimitive } from "radix-ui";
@@ -105,7 +108,7 @@ export function SearchOverlay({
                   {matchedServices.map((s) => (
                     <Link
                       key={s.slug}
-                      href={`/categories/${s.categorySlug}/${s.slug}`}
+                      href={productUrl(s)}
                       onClick={close}
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-muted"
                     >

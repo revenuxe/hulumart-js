@@ -1,5 +1,8 @@
 "use client";
 
+import { productUrl } from "@/lib/product-url";
+
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Layers, PartyPopper, Search } from "lucide-react";
@@ -155,7 +158,7 @@ export function SearchBar({
               {matchedServices.slice(0, 4).map((s) => (
                 <Link
                   key={s.slug}
-                  href={`/categories/${s.categorySlug}/${s.slug}`}
+                  href={productUrl(s)}
                   onClick={() => setFocused(false)}
                   className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-muted"
                 >
