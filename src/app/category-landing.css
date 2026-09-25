@@ -1,0 +1,329 @@
+/* ── Category Landing Pages ──
+   Reuses the same design language as selling-home.css (homepage hero + card
+   grid) so every landing page feels like a natural extension of the home page.
+   Each page has:
+     1. Hero section (full-width image + text overlay)
+     2. Subcategory card grid
+     3. Sell-prompt / store-prompt CTA
+*/
+
+/* ── Layout shell ── */
+.cat-landing {
+  background: var(--background);
+  color: var(--primary);
+  padding-bottom: 78px;
+}
+
+/* ── Hero ── */
+.cat-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 560px;
+  background: var(--brand-ink);
+  overflow: hidden;
+}
+.cat-hero-image {
+  object-fit: cover;
+  object-position: center;
+  z-index: -2;
+}
+.cat-hero-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-ink) 82%, transparent) 0%,
+    color-mix(in srgb, var(--brand-ink) 82%, transparent) 50%,
+    var(--brand-ink) 100%
+  );
+}
+.cat-hero-inner {
+  max-width: 1240px;
+  margin: auto;
+  padding: 70px 18px 88px;
+}
+.cat-hero h1 {
+  max-width: 680px;
+  font-size: clamp(28px, 7.5vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  font-weight: 850;
+  color: #fff;
+}
+.cat-hero h1 span {
+  display: block;
+  background: linear-gradient(100deg, var(--accent), var(--brand-purple));
+  background-clip: text;
+  color: transparent;
+  width: fit-content;
+}
+.cat-hero-description {
+  max-width: 600px;
+  margin-top: 22px;
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--border);
+  font-weight: 500;
+}
+.cat-hero .selling-primary {
+  margin-top: 32px;
+  max-width: 610px;
+}
+
+/* ── Breadcrumb ── */
+.cat-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+}
+.cat-breadcrumb a {
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 0.2s;
+}
+.cat-breadcrumb a:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+.cat-breadcrumb-sep {
+  font-size: 11px;
+  opacity: 0.5;
+}
+.cat-breadcrumb-current {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ── Subcategory section ── */
+.cat-subcategories {
+  max-width: 1240px;
+  margin: auto;
+  padding: 80px 20px 56px;
+}
+
+/* ── Subcategory card grid ── */
+.cat-subcat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 14px;
+  margin-top: 32px;
+}
+
+/* ── Subcategory card ── */
+.cat-subcat-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 220px;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--brand-purple) 30%, var(--border));
+  background: var(--gradient-brand);
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s;
+}
+.cat-subcat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-elevated);
+}
+.cat-subcat-card-image {
+  z-index: -2;
+  object-fit: cover;
+  transition: transform 0.35s var(--ease-spring);
+}
+.cat-subcat-card:hover .cat-subcat-card-image {
+  transform: scale(1.05);
+}
+.cat-subcat-card-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--brand-ink) 22%, transparent) 25%,
+    color-mix(in srgb, var(--brand-ink) 72%, transparent) 45%,
+    color-mix(in srgb, var(--brand-ink) 92%, transparent) 60%,
+    var(--brand-ink) 78%
+  );
+}
+.cat-subcat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  min-height: 220px;
+  height: 100%;
+  padding: 16px;
+  color: white;
+}
+.cat-subcat-card h3 {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.55),
+    0 4px 10px rgba(6, 41, 95, 0.65);
+}
+.cat-subcat-card p {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cat-subcat-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  background: var(--accent);
+  border-radius: 30px;
+  color: white;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 750;
+  transition: background 0.2s;
+}
+.cat-subcat-card:hover .cat-subcat-card-action,
+.cat-subcat-card:focus-visible .cat-subcat-card-action {
+  background: color-mix(in srgb, var(--accent) 85%, black);
+}
+
+/* ── Sell prompt (reuses homepage styling) ── */
+.cat-sell-prompt {
+  max-width: 1200px;
+  margin: 0 auto 64px;
+  padding: 32px 20px;
+  border-top: 1px solid var(--border);
+}
+.cat-sell-prompt p:not(.selling-eyebrow) {
+  margin: 16px 0 24px;
+  color: var(--muted-foreground);
+}
+
+/* ── Stats row ── */
+.cat-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.cat-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cat-stat-value {
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: -1px;
+  background: linear-gradient(100deg, #fff, var(--accent));
+  background-clip: text;
+  color: transparent;
+}
+.cat-stat-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
+/* ── Focus styles ── */
+.cat-landing a:focus-visible,
+.cat-landing button:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 4px;
+}
+
+/* ── Responsive: small phones ── */
+@media (max-width: 380px) {
+  .cat-subcat-card-content {
+    padding: 12px;
+  }
+  .cat-subcat-card h3 {
+    font-size: 19px;
+  }
+}
+
+/* ── Responsive: tablet + ── */
+@media (min-width: 768px) {
+  .cat-landing {
+    padding-bottom: 0;
+  }
+  .cat-hero-inner {
+    padding: 80px 32px;
+  }
+  .cat-hero h1 {
+    font-size: 58px;
+  }
+  .cat-hero-shade {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--brand-ink) 96%, transparent) 10%,
+      color-mix(in srgb, var(--brand-ink) 88%, transparent) 50%,
+      color-mix(in srgb, var(--brand-ink) 40%, transparent) 100%
+    );
+  }
+  .cat-hero-description {
+    max-width: 560px;
+  }
+  .cat-subcategories {
+    padding: 72px 32px;
+  }
+  .cat-subcat-grid {
+    gap: 22px;
+  }
+  .cat-subcat-card,
+  .cat-subcat-card-content {
+    min-height: 310px;
+  }
+  .cat-subcat-card-content {
+    padding: 22px;
+  }
+  .cat-subcat-card h3 {
+    font-size: 24px;
+  }
+  .cat-sell-prompt {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+  }
+  .cat-sell-prompt .selling-primary {
+    min-width: 260px;
+    padding: 0 24px;
+  }
+  .cat-stats {
+    gap: 40px;
+  }
+  .cat-stat-value {
+    font-size: 36px;
+  }
+}
+
+/* ── Responsive: desktop ── */
+@media (min-width: 1024px) {
+  .cat-subcat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-subcat-card-image {
+    transition: none;
+  }
+  .cat-subcat-card {
+    transition: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .cat-breadcrumb {
+    font-size: 12px;
+  }
+}

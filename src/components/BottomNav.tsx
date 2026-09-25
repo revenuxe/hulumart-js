@@ -1,56 +1,99 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, ShoppingBag, User } from "lucide-react";
-
-const ITEMS = [
-  { to: "/", label: "Home", Icon: Home, exact: true },
-  { to: "/categories", label: "Categories", Icon: LayoutGrid, exact: false },
-  { to: "/cart", label: "Cart", Icon: ShoppingBag, exact: false },
-  { to: "/profile", label: "Profile", Icon: User, exact: false },
-] as const;
-
+import { Home, Menu, Store, Tag } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { CONTACT } from "@/lib/site";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 export function BottomNav() {
-  const pathname = usePathname();
-  // The bottom navigation is also rendered during the initial client render.
-  // Treat an unresolved pathname as the homepage so Home does not flash as
-  // inactive before Next finishes hydrating the current route.
-  const activePathname = pathname || "/";
-
+  const pathname = usePathname() || "/";
+  const navLink = (to: string, label: string, Icon: typeof Home) => {
+    const active =
+      to === "/"
+        ? pathname === "/"
+        : to === "/store"
+          ? [
+              "/store",
+              "/categories",
+              "/featured",
+              "/trending",
+              "/cart",
+              "/checkout",
+            ].some(
+              (route) => pathname === route || pathname.startsWith(`${route}/`),
+            )
+          : pathname === to;
+    return (
+      <Link
+        href={to}
+        aria-current={active ? "page" : undefined}
+        className={`flex min-h-16 flex-col items-center justify-center gap-1.5 text-xs font-semibold ${active ? "text-primary" : "text-muted-foreground"}`}
+      >
+        <Icon size={23} strokeWidth={1.8} />
+        <span>{label}</span>
+      </Link>
+    );
+  };
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <div className="mx-auto max-w-md px-4">
-        <div className="flex items-center justify-between gap-1 rounded-full border border-[#e1e8f0] bg-white px-2 py-2 shadow-elevated">
-          {ITEMS.map(({ to, label, Icon, exact }) => {
-            // Home covers the root plus public marketing pages. The other
-            // tabs own their route trees and take precedence when matched.
-            const active = exact
-              ? !["/categories", "/cart", "/profile"].some((route) => activePathname === route || activePathname.startsWith(`${route}/`))
-              : activePathname === to || activePathname.startsWith(`${to}/`);
-            return (
-              <Link
-                key={to}
-                href={to}
-                className={`group flex flex-1 flex-col items-center gap-1 px-1 py-1 text-[11px] font-semibold ${
-                  active ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <span
-                  className={`relative grid h-10 w-10 place-items-center rounded-full transition-all ${
-                    active ? "bg-[#06295f] text-white shadow-glow" : ""
-                  }`}
-                >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />
-                </span>
-                <span className="leading-none">{label}</span>
-              </Link>
-            );
-          })}
-        </div>
+      <div className="mx-auto grid h-[78px] max-w-xl grid-cols-5 items-center">
+        {navLink("/", "Home", Home)}
+        {navLink("/sell", "Sell items", Tag)}
+        <a
+          href={CONTACT.whatsappHref}
+          aria-label="Chat on WhatsApp"
+          className="relative flex h-full flex-col items-center justify-end gap-1 pb-3 text-xs font-semibold text-primary"
+        >
+          <span className="absolute -top-6 grid h-[68px] w-[68px] place-items-center rounded-full border-[5px] border-background bg-accent">
+            <WhatsAppIcon className="h-9 w-9 text-white" />
+          </span>
+          <span>WhatsApp</span>
+        </a>
+        {navLink("/store", "Store", Store)}
+        <Sheet>
+          <SheetTrigger className="flex min-h-16 flex-col items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            <Menu size={23} strokeWidth={1.8} />
+            Menu
+          </SheetTrigger>
+          <SheetContent
+            side="bottom"
+            className="rounded-t-3xl p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+          >
+            <SheetTitle>Explore Hulumart</SheetTitle>
+            <SheetDescription>
+              Buy and sell pre-loved items in Bangalore.
+            </SheetDescription>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                ["/sell", "Sell an item"],
+                ["/store", "Store"],
+                ["/categories", "All categories"],
+                ["/cart", "Cart"],
+                ["/profile", "My account"],
+                [CONTACT.whatsappHref, "WhatsApp us"],
+              ].map(([href, label]) => (
+                <SheetClose asChild key={href}>
+                  <Link
+                    href={href}
+                    className="rounded-xl border border-border p-4 text-sm font-semibold"
+                  >
+                    {label}
+                  </Link>
+                </SheetClose>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </nav>
   );

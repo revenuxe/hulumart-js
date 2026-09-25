@@ -26,7 +26,7 @@ export function Footer() {
         </Link>
       </div>
 
-      <div className="mt-8 flex items-center justify-between">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
         <Image
           src={logo}
           alt="Hulumart — Buy it. Sell it. Repeat it."
@@ -71,3 +71,4 @@ export function Footer() {
     </footer>
   );
 }
+
