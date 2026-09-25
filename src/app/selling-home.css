@@ -79,6 +79,7 @@
   background-clip: text;
   color: transparent;
   width: fit-content;
+  padding-bottom: 6px;
 }
 .selling-hero-description {
   max-width: 610px;

@@ -57,6 +57,7 @@
   background-clip: text;
   color: transparent;
   width: fit-content;
+  padding-bottom: 6px;
 }
 .cat-hero-description {
   max-width: 600px;
